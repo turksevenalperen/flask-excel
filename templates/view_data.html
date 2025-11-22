@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Veriler - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>📊 Kayıtlı Veriler</h1>
+    <p class="subtitle">Toplam {{ vehicles.total }} kayıt</p>
+    
+    <div class="action-buttons">
+        <a href="/" class="btn">⬅️ Ana Sayfa</a>
+        <a href="/api/vehicles" class="btn btn-secondary" target="_blank">📡 JSON API</a>
+    </div>
+    
+    {% if vehicles.items %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Marka</th>
+                <th>Model</th>
+                <th>Yıl</th>
+                <th>Fiyat</th>
+                <th>Eklenme</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehicle in vehicles.items %}
+            <tr>
+                <td>{{ vehicle.id }}</td>
+                <td>{{ vehicle.marka }}</td>
+                <td>{{ vehicle.model }}</td>
+                <td>{{ vehicle.yil }}</td>
+                <td>{{ '{:,}'.format(vehicle.fiyat).replace(',', '.') }} ₺</td>
+                <td>{{ vehicle.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Sayfalama -->
+    <div class="pagination">
+        {% if vehicles.has_prev %}
+            <a href="{{ url_for('view_data', page=vehicles.prev_num) }}">⬅️ Önceki</a>
+        {% endif %}
+        
+        <a href="#" class="active">Sayfa {{ vehicles.page }} / {{ vehicles.pages }}</a>
+        
+        {% if vehicles.has_next %}
+            <a href="{{ url_for('view_data', page=vehicles.next_num) }}">Sonraki ➡️</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #666; margin-top: 30px;">
+        Henüz veri yok. Excel dosyası yükleyin!
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

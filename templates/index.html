@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Excel Yükle - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>🚗 Araç Fiyat Yönetimi</h1>
+    <p class="subtitle">Excel dosyanızı yükleyin, otomatik olarak işlensin!</p>
+    
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_records }}</div>
+            <div class="stat-label">Toplam Kayıt</div>
+        </div>
+    </div>
+    
+    <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+        <label for="fileInput" class="upload-area">
+            <div class="upload-icon">📁</div>
+            <h2>Excel Dosyası Yükle</h2>
+            <p style="margin-top: 10px; color: #666;">
+                Tıklayın veya dosyayı sürükleyin<br>
+                <small>(Sadece .xlsx ve .xls)</small>
+            </p>
+            <input type="file" name="file" id="fileInput" accept=".xlsx,.xls" required>
+            <div id="fileName" style="margin-top: 20px; color: #667eea; font-weight: bold;"></div>
+        </label>
+        
+        <div class="action-buttons">
+            <button type="submit" class="btn">✅ Yükle ve İşle</button>
+            <a href="/view" class="btn btn-secondary">📊 Verileri Görüntüle</a>
+            <button type="button" class="btn btn-danger" onclick="confirmClear()">🗑️ Tümünü Temizle</button>
+        </div>
+    </form>
+</div>
+
+<form id="clearForm" action="/clear" method="post" style="display: none;"></form>
+
+<script>
+    // Dosya seçildiğinde ismini göster
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || '';
+        document.getElementById('fileName').textContent = fileName ? `Seçilen: ${fileName}` : '';
+    });
+    
+    // Temizleme onayı
+    function confirmClear() {
+        if (confirm('⚠️ TÜM VERİLER SİLİNECEK! Emin misiniz?')) {
+            document.getElementById('clearForm').submit();
+        }
+    }
+    
+    // Drag & Drop desteği
+    const uploadArea = document.querySelector('.upload-area');
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#764ba2';
+        uploadArea.style.background = '#f0f1ff';
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#667eea';
+        uploadArea.style.background = '#f8f9ff';
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        document.getElementById('fileInput').files = e.dataTransfer.files;
+        document.getElementById('fileName').textContent = `Seçilen: ${file.name}`;
+    });
+</script>
+{% endblock %}
