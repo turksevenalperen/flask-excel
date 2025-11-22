@@ -1,3 +1,47 @@
+# ==========================================
+# 1. requirements.txt
+# ==========================================
+"""
+Flask==3.1.0
+pandas==2.2.3
+openpyxl==3.1.5
+SQLAlchemy==2.0.36
+Flask-SQLAlchemy==3.1.1
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+"""
+
+# ==========================================
+# 2. models.py - Veritabanı Modelleri
+# ==========================================
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+
+db = SQLAlchemy()
+
+class Vehicle(db.Model):
+    __tablename__ = 'vehicles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    marka = db.Column(db.String(100), nullable=False)
+    model = db.Column(db.String(200), nullable=False)
+    yil = db.Column(db.String(10), nullable=False)
+    fiyat = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'marka': self.marka,
+            'model': self.model,
+            'yil': self.yil,
+            'fiyat': self.fiyat,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+# ==========================================
+# 3. app.py - Ana Flask Uygulaması
+# ==========================================
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 import pandas as pd
 import os
@@ -6,7 +50,13 @@ from models import db, Vehicle
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'gizli-anahtar-buraya-rastgele-yaz'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+# PostgreSQL bağlantısı (Render Environment Variable'dan gelecek)
+import os
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
