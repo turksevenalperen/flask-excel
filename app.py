@@ -1,66 +1,46 @@
-
-
-# ==========================================
-# 3. app.py - Ana Flask Uygulaması
-# ==========================================
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask_cors import CORS
 import pandas as pd
 import os
 from werkzeug.utils import secure_filename
 from models import db, Vehicle
-from flask_cors import CORS
-
 
 app = Flask(__name__)
-CORS(app)
+
+# CORS'u EN BAŞTA ekle
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['SECRET_KEY'] = 'asdasd06'
 
-# PostgreSQL bağlantısı (Render Environment Variable'dan gelecek)
-import os
+# PostgreSQL bağlantısı
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Veritabanını başlat
 db.init_app(app)
 
-# Upload klasörünü oluştur
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Veritabanı tablolarını oluştur
 with app.app_context():
     db.create_all()
 
-# İzin verilen dosya türleri
 ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def process_excel(filepath):
-    """Excel dosyasını işle ve veritabanına kaydet"""
     try:
-        # Excel'i oku
         df = pd.read_excel(filepath)
-        
-        # Veriyi dönüştür (geniş → uzun format)
-        yeni_df = pd.melt(
-            df,
-            id_vars=['Marka', 'Model'],
-            var_name='Yıl',
-            value_name='Fiyat'
-        )
-        
-        # Sıfır ve boşları temizle
+        yeni_df = pd.melt(df, id_vars=['Marka', 'Model'], var_name='Yıl', value_name='Fiyat')
         yeni_df = yeni_df[yeni_df['Fiyat'] > 0]
         yeni_df = yeni_df.dropna(subset=['Fiyat'])
         
-        # Veritabanına kaydet
         saved_count = 0
         for _, row in yeni_df.iterrows():
             vehicle = Vehicle(
@@ -74,20 +54,17 @@ def process_excel(filepath):
         
         db.session.commit()
         return saved_count, None
-        
     except Exception as e:
         db.session.rollback()
         return 0, str(e)
 
 @app.route('/')
 def index():
-    """Ana sayfa - Excel yükleme"""
     total_records = Vehicle.query.count()
     return render_template('index.html', total_records=total_records)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    """Excel dosyası yükleme ve işleme"""
     if 'file' not in request.files:
         flash('Dosya seçilmedi!', 'error')
         return redirect(url_for('index'))
@@ -103,10 +80,7 @@ def upload_file():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
         
-        # Excel'i işle
         count, error = process_excel(filepath)
-        
-        # Dosyayı sil
         os.remove(filepath)
         
         if error:
@@ -116,50 +90,40 @@ def upload_file():
         
         return redirect(url_for('index'))
     
-    flash('Geçersiz dosya türü! Sadece .xlsx veya .xls yükleyin.', 'error')
+    flash('Geçersiz dosya türü!', 'error')
     return redirect(url_for('index'))
 
 @app.route('/view')
 def view_data():
-    """Verileri görüntüle"""
     page = request.args.get('page', 1, type=int)
-    per_page = 50
-    
     vehicles = Vehicle.query.order_by(Vehicle.created_at.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
+        page=page, per_page=50, error_out=False
     )
-    
     return render_template('view_data.html', vehicles=vehicles)
 
 @app.route('/api/vehicles')
 def api_vehicles():
-    """API: Tüm verileri JSON olarak döndür"""
     vehicles = Vehicle.query.all()
     return jsonify([v.to_dict() for v in vehicles])
 
 @app.route('/api/vehicles/<int:vehicle_id>')
 def api_vehicle_detail(vehicle_id):
-    """API: Tek bir kayıt"""
     vehicle = Vehicle.query.get_or_404(vehicle_id)
     return jsonify(vehicle.to_dict())
 
 @app.route('/api/search')
 def api_search():
-    """API: Marka veya modele göre arama"""
     query = request.args.get('q', '')
-    
     vehicles = Vehicle.query.filter(
         db.or_(
             Vehicle.marka.ilike(f'%{query}%'),
             Vehicle.model.ilike(f'%{query}%')
         )
     ).all()
-    
     return jsonify([v.to_dict() for v in vehicles])
 
 @app.route('/clear', methods=['POST'])
 def clear_data():
-    """Tüm verileri temizle"""
     try:
         Vehicle.query.delete()
         db.session.commit()
@@ -167,7 +131,6 @@ def clear_data():
     except Exception as e:
         db.session.rollback()
         flash(f'Hata: {str(e)}', 'error')
-    
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
