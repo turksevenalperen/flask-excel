@@ -39,7 +39,7 @@ def process_excel_sigorta(filepath):
         # Excel'i oku
         df = pd.read_excel(filepath)
         
-        print(f"📊 Excel okundu: {len(df)} satır, {len(df.columns)} sütun")
+        print(f"📊 Excel okunduu: {len(df)} satır, {len(df.columns)} sütun")
         print(f"Sütunlar: {list(df.columns)}")
         
         # Zorunlu sütunları kontrol et
