@@ -97,12 +97,15 @@ def process_excel_sigorta(filepath):
             for sigorta_col in sigorta_sutunlari:
                 fiyat = row[sigorta_col]
                 
-                # 0, NaN ve boş değerleri ekleme
-                if pd.notna(fiyat) and fiyat > 0:
-                    try:
-                        sigortalar[sigorta_col] = int(float(fiyat))
-                    except:
-                        continue
+                # Fiyatı string olarak temizle ve sayıya çevir
+                fiyat_raw = str(fiyat).replace(" ", "").replace(",", ".").strip()
+                fiyat_num = pd.to_numeric(fiyat_raw, errors="coerce")
+                
+                # Geçersiz veya <=0 ise ekleme
+                if pd.isna(fiyat_num) or fiyat_num <= 0:
+                    continue
+
+                sigortalar[sigorta_col] = int(fiyat_num)
             
             # Eğer hiç sigorta fiyatı yoksa bu satırı atla
             if not sigortalar:
@@ -225,7 +228,7 @@ def upload_file():
         flash('📤 Dosya yüklendi! Arka planda işleniyor... (İlerleyi /upload-status adresinden takip edebilirsiniz)', 'info')
         return redirect(url_for('index'))
     
-    flash('Geçersizz dosya türü! Sadece .xlsx veya .xls', 'error')
+    flash('Geçersiz dosya türü! Sadece .xlsx veya .xls', 'error')
     return redirect(url_for('index'))
 
 @app.route('/upload-status')
