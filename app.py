@@ -27,8 +27,8 @@ db.init_app(app)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 with app.app_context():
-    db.create_all()
-
+    db.drop_all()  # ESKİ TABLOLARI SİL
+    db.create_all() # YENİ TABLOLARI OLUŞTUR
 ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 
 def allowed_file(filename):
