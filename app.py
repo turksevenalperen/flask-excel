@@ -27,10 +27,9 @@ db.init_app(app)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 with app.app_context():
-    db.drop_all()  # ESKİ TABLOLARI SİL
     db.create_all() # YENİ TABLOLARI OLUŞTUR
 ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
-
+ 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
