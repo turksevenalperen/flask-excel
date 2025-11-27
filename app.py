@@ -4,6 +4,8 @@ import pandas as pd
 import os
 from werkzeug.utils import secure_filename
 from models import db, Vehicle
+import threading
+import gc
 
 app = Flask(__name__)
 
@@ -19,88 +21,123 @@ if database_url and database_url.startswith('postgres://'):
     
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_size': 5,
+    'pool_recycle': 300,
+    'pool_pre_ping': True,
+}
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB (büyük Excel için)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB
 
 db.init_app(app)
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 with app.app_context():
-    db.create_all() # YENİ TABLOLARI OLUŞTUR
+    db.create_all()
+
 ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
  
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Global değişken - işlem durumu
+upload_status = {
+    'is_processing': False,
+    'progress': 0,
+    'total': 0,
+    'saved': 0,
+    'error': None
+}
+
 def process_excel_sigorta(filepath):
-    """Yeni format: MARKA, MODEL, YIL + Sigorta Şirketleri"""
+    """Bellek dostu chunk işleme"""
+    global upload_status
+    
     try:
-        # Excel'i oku
-        df = pd.read_excel(filepath)
+        upload_status['is_processing'] = True
+        upload_status['progress'] = 0
+        upload_status['error'] = None
         
-        print(f"📊 Excel okunduu: {len(df)} satır, {len(df.columns)} sütun")
-        print(f"Sütunlar: {list(df.columns)}")
+        # İlk önce toplam satır sayısını öğren (hafif)
+        temp_df = pd.read_excel(filepath, nrows=1)
+        total_rows = sum(1 for _ in open(filepath, 'rb'))  # Yaklaşık
         
-        # Zorunlu sütunları kontrol et
         required_cols = ['MARKA', 'MODEL', 'YIL']
         for col in required_cols:
-            if col not in df.columns:
-                return 0, f"'{col}' sütunu bulunamadı!"
+            if col not in temp_df.columns:
+                upload_status['error'] = f"'{col}' sütunu bulunamadı!"
+                return 0, upload_status['error']
         
-        # Sigorta sütunlarını bul (MARKA, MODEL, YIL hariç)
-        sigorta_sutunlari = [col for col in df.columns if col not in required_cols]
+        sigorta_sutunlari = [col for col in temp_df.columns if col not in required_cols]
         
-        print(f"🏢 Sigorta şirketleri: {sigorta_sutunlari}")
+        del temp_df
+        gc.collect()
         
         saved_count = 0
         skipped_count = 0
+        chunk_size = 2000  # Küçük chunk - bellek tasarrufu
         
-        # Batch işlem (1000'erli gruplar)
-        batch_size = 1000
+        print(f"🚀 Excel işleniyor... Tahmini {total_rows} satır")
         
-        for idx, row in df.iterrows():
-            # Sigorta şirketlerini JSON'a çevir
-            sigortalar = {}
+        # CHUNK HALİNDE OKU - BELLEK DOSTU
+        for chunk_num, chunk_df in enumerate(pd.read_excel(filepath, chunksize=chunk_size)):
+            print(f"📦 Chunk {chunk_num + 1} işleniyor: {len(chunk_df)} satır")
             
-            for sigorta_col in sigorta_sutunlari:
-                fiyat = row[sigorta_col]
+            vehicles_to_add = []
+            
+            for idx, row in chunk_df.iterrows():
+                sigortalar = {}
                 
-                # 0, NaN ve boş değerleri ekleme
-                if pd.notna(fiyat) and fiyat > 0:
-                    # Float'u int'e çevir
-                    sigortalar[sigorta_col] = int(fiyat)
+                for sigorta_col in sigorta_sutunlari:
+                    fiyat = row[sigorta_col]
+                    
+                    if pd.notna(fiyat) and fiyat > 0:
+                        try:
+                            sigortalar[sigorta_col] = int(float(fiyat))
+                        except:
+                            continue
+                
+                if not sigortalar:
+                    skipped_count += 1
+                    continue
+                
+                vehicle = Vehicle(
+                    marka=str(row['MARKA']).strip(),
+                    model=str(row['MODEL']).strip(),
+                    yil=str(int(float(row['YIL']))),
+                    sigortalar=sigortalar
+                )
+                vehicles_to_add.append(vehicle)
+                saved_count += 1
             
-            # Eğer hiç sigorta fiyatı yoksa bu satırı atla
-            if not sigortalar:
-                skipped_count += 1
-                continue
-            
-            # Veritabanına ekle
-            vehicle = Vehicle(
-                marka=str(row['MARKA']).strip(),
-                model=str(row['MODEL']).strip(),
-                yil=str(int(row['YIL'])),  # 2024.0 → "2024"
-                sigortalar=sigortalar
-            )
-            db.session.add(vehicle)
-            saved_count += 1
-            
-            # Her 1000 kayıtta bir commit (performans)
-            if saved_count % batch_size == 0:
+            # BULK INSERT - HIZLI
+            if vehicles_to_add:
+                db.session.bulk_save_objects(vehicles_to_add)
                 db.session.commit()
-                print(f"✅ {saved_count} kayıt eklendi...")
+            
+            # Bellek temizle
+            del chunk_df
+            del vehicles_to_add
+            gc.collect()
+            
+            # İlerleme güncelle
+            upload_status['progress'] = saved_count
+            upload_status['saved'] = saved_count
+            
+            print(f"✅ Chunk {chunk_num + 1} tamamlandı - Toplam: {saved_count}")
         
-        # Son batch'i kaydet
-        db.session.commit()
+        upload_status['is_processing'] = False
+        upload_status['total'] = saved_count
         
-        print(f"\n✅ Başarılı: {saved_count} kayıt eklendi")
-        print(f"⏭️  Atlanan (boş): {skipped_count} satır")
+        print(f"\n🎉 TAMAMLANDI: {saved_count} kayıt eklendi, {skipped_count} atlandı")
         
         return saved_count, None
         
     except Exception as e:
         db.session.rollback()
+        upload_status['is_processing'] = False
+        upload_status['error'] = str(e)
         print(f"❌ HATA: {str(e)}")
         return 0, str(e)
 
@@ -108,10 +145,8 @@ def process_excel_sigorta(filepath):
 def index():
     total_records = Vehicle.query.count()
     
-    # Benzersiz marka sayısı
     unique_brands = db.session.query(Vehicle.marka).distinct().count()
     
-    # İlk kayıttan sigorta şirketlerini al
     first_vehicle = Vehicle.query.first()
     sigorta_sirketleri = []
     if first_vehicle and first_vehicle.sigortalar:
@@ -124,6 +159,12 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    global upload_status
+    
+    if upload_status['is_processing']:
+        flash('⏳ Bir dosya zaten işleniyor, lütfen bekleyin!', 'warning')
+        return redirect(url_for('index'))
+    
     if 'file' not in request.files:
         flash('Dosya seçilmedi!', 'error')
         return redirect(url_for('index'))
@@ -141,21 +182,36 @@ def upload_file():
         
         print(f"📁 Dosya kaydedildi: {filepath}")
         
-        # Excel'i işle
-        count, error = process_excel_sigorta(filepath)
+        # ARKA PLANDA İŞLE - TIMEOUT YOK
+        def process_in_background():
+            with app.app_context():
+                count, error = process_excel_sigorta(filepath)
+                
+                # Dosyayı sil
+                try:
+                    os.remove(filepath)
+                except:
+                    pass
+                
+                if error:
+                    print(f"❌ Hata: {error}")
+                else:
+                    print(f"✅ Başarılı: {count} kayıt")
         
-        # Dosyayı sil
-        os.remove(filepath)
+        thread = threading.Thread(target=process_in_background, daemon=True)
+        thread.start()
         
-        if error:
-            flash(f'❌ Hata: {error}', 'error')
-        else:
-            flash(f'✅ Başarılı! {count} kayıt eklendi.', 'success')
-        
+        flash('📤 Dosya yüklendi! Arka planda işleniyor... (İlerleyi /upload-status adresinden takip edebilirsiniz)', 'info')
         return redirect(url_for('index'))
     
     flash('Geçersiz dosya türü! Sadece .xlsx veya .xls', 'error')
     return redirect(url_for('index'))
+
+@app.route('/upload-status')
+def upload_status_page():
+    """İşlem durumunu göster"""
+    global upload_status
+    return jsonify(upload_status)
 
 @app.route('/view')
 def view_data():
