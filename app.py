@@ -51,7 +51,7 @@ upload_status = {
 }
 
 def process_excel_sigorta(filepath):
-    """Bellek dostu chunk işleme"""
+    """Bellek dostu batch işleme - Excel için optimize"""
     global upload_status
     
     try:
@@ -59,75 +59,93 @@ def process_excel_sigorta(filepath):
         upload_status['progress'] = 0
         upload_status['error'] = None
         
-        # İlk önce toplam satır sayısını öğren (hafif)
-        temp_df = pd.read_excel(filepath, nrows=1)
-        total_rows = sum(1 for _ in open(filepath, 'rb'))  # Yaklaşık
+        print(f"📁 Excel dosyası açılıyor...")
         
+        # Excel'i bir kerede oku ama optimize et
+        df = pd.read_excel(filepath, engine='openpyxl')
+        
+        print(f"📊 Excel okundu: {len(df)} satır, {len(df.columns)} sütun")
+        print(f"Sütunlar: {list(df.columns)}")
+        
+        # Zorunlu sütunları kontrol et
         required_cols = ['MARKA', 'MODEL', 'YIL']
         for col in required_cols:
-            if col not in temp_df.columns:
+            if col not in df.columns:
                 upload_status['error'] = f"'{col}' sütunu bulunamadı!"
+                upload_status['is_processing'] = False
                 return 0, upload_status['error']
         
-        sigorta_sutunlari = [col for col in temp_df.columns if col not in required_cols]
+        # Sigorta sütunlarını bul
+        sigorta_sutunlari = [col for col in df.columns if col not in required_cols]
         
-        del temp_df
-        gc.collect()
+        print(f"🏢 Sigorta şirketleri: {sigorta_sutunlari}")
         
         saved_count = 0
         skipped_count = 0
-        chunk_size = 2000  # Küçük chunk - bellek tasarrufu
+        batch_size = 1000  # Her 1000 kayıtta bir veritabanına yaz
         
-        print(f"🚀 Excel işleniyor... Tahmini {total_rows} satır")
+        vehicles_batch = []
         
-        # CHUNK HALİNDE OKU - BELLEK DOSTU
-        for chunk_num, chunk_df in enumerate(pd.read_excel(filepath, chunksize=chunk_size)):
-            print(f"📦 Chunk {chunk_num + 1} işleniyor: {len(chunk_df)} satır")
+        total_rows = len(df)
+        upload_status['total'] = total_rows
+        
+        print(f"🚀 Toplam {total_rows} satır işlenecek...")
+        
+        for idx, row in df.iterrows():
+            sigortalar = {}
             
-            vehicles_to_add = []
+            for sigorta_col in sigorta_sutunlari:
+                fiyat = row[sigorta_col]
+                
+                # 0, NaN ve boş değerleri ekleme
+                if pd.notna(fiyat) and fiyat > 0:
+                    try:
+                        sigortalar[sigorta_col] = int(float(fiyat))
+                    except:
+                        continue
             
-            for idx, row in chunk_df.iterrows():
-                sigortalar = {}
-                
-                for sigorta_col in sigorta_sutunlari:
-                    fiyat = row[sigorta_col]
-                    
-                    if pd.notna(fiyat) and fiyat > 0:
-                        try:
-                            sigortalar[sigorta_col] = int(float(fiyat))
-                        except:
-                            continue
-                
-                if not sigortalar:
-                    skipped_count += 1
-                    continue
-                
-                vehicle = Vehicle(
-                    marka=str(row['MARKA']).strip(),
-                    model=str(row['MODEL']).strip(),
-                    yil=str(int(float(row['YIL']))),
-                    sigortalar=sigortalar
-                )
-                vehicles_to_add.append(vehicle)
-                saved_count += 1
+            # Eğer hiç sigorta fiyatı yoksa bu satırı atla
+            if not sigortalar:
+                skipped_count += 1
+                continue
             
-            # BULK INSERT - HIZLI
-            if vehicles_to_add:
-                db.session.bulk_save_objects(vehicles_to_add)
+            vehicle = Vehicle(
+                marka=str(row['MARKA']).strip(),
+                model=str(row['MODEL']).strip(),
+                yil=str(int(float(row['YIL']))),
+                sigortalar=sigortalar
+            )
+            
+            vehicles_batch.append(vehicle)
+            saved_count += 1
+            
+            # Her 1000 kayıtta bir veritabanına yaz (BULK INSERT)
+            if len(vehicles_batch) >= batch_size:
+                db.session.bulk_save_objects(vehicles_batch)
                 db.session.commit()
-            
-            # Bellek temizle
-            del chunk_df
-            del vehicles_to_add
-            gc.collect()
-            
-            # İlerleme güncelle
-            upload_status['progress'] = saved_count
-            upload_status['saved'] = saved_count
-            
-            print(f"✅ Chunk {chunk_num + 1} tamamlandı - Toplam: {saved_count}")
+                
+                # İlerleme güncelle
+                upload_status['progress'] = saved_count
+                upload_status['saved'] = saved_count
+                
+                print(f"✅ {saved_count}/{total_rows} kayıt eklendi...")
+                
+                # Belleği temizle
+                vehicles_batch = []
+                gc.collect()
+        
+        # Kalan kayıtları ekle
+        if vehicles_batch:
+            db.session.bulk_save_objects(vehicles_batch)
+            db.session.commit()
+        
+        # DataFrame'i belleğe sil
+        del df
+        gc.collect()
         
         upload_status['is_processing'] = False
+        upload_status['progress'] = saved_count
+        upload_status['saved'] = saved_count
         upload_status['total'] = saved_count
         
         print(f"\n🎉 TAMAMLANDI: {saved_count} kayıt eklendi, {skipped_count} atlandı")
@@ -139,6 +157,8 @@ def process_excel_sigorta(filepath):
         upload_status['is_processing'] = False
         upload_status['error'] = str(e)
         print(f"❌ HATA: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return 0, str(e)
 
 @app.route('/')
@@ -190,6 +210,7 @@ def upload_file():
                 # Dosyayı sil
                 try:
                     os.remove(filepath)
+                    print(f"🗑️ Geçici dosya silindi: {filepath}")
                 except:
                     pass
                 
@@ -312,7 +333,7 @@ def clear_data():
     try:
         Vehicle.query.delete()
         db.session.commit()
-        flash('✅ Tüm veriler temizlendii!', 'success')
+        flash('✅ Tüm veriler temizlendi!', 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'❌ Hata: {str(e)}', 'error')
