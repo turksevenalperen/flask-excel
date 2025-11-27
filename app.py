@@ -312,7 +312,7 @@ def clear_data():
     try:
         Vehicle.query.delete()
         db.session.commit()
-        flash('✅ Tüm veriler temizlendi!', 'success')
+        flash('✅ Tüm veriler temizlendii!', 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'❌ Hata: {str(e)}', 'error')
