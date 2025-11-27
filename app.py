@@ -225,7 +225,7 @@ def upload_file():
         flash('📤 Dosya yüklendi! Arka planda işleniyor... (İlerleyi /upload-status adresinden takip edebilirsiniz)', 'info')
         return redirect(url_for('index'))
     
-    flash('Geçersiz dosya türü! Sadece .xlsx veya .xls', 'error')
+    flash('Geçersizz dosya türü! Sadece .xlsx veya .xls', 'error')
     return redirect(url_for('index'))
 
 @app.route('/upload-status')
