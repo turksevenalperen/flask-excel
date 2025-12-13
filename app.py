@@ -12,7 +12,7 @@ app = Flask(__name__)
 # CORS
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-app.config['SECRET_KEY'] = 'asdasd06-sigorta-2025'
+app.config['SECRET_KEY'] = 'asdasd06-sigorta-2025-railway'
 
 # PostgreSQL bağlantısı
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
@@ -294,6 +294,21 @@ def api_brands():
 def api_models(brand):
     """Belirli bir markaya ait modelleri döndür"""
     models = db.session.query(Vehicle.model).filter_by(marka=brand).distinct().order_by(Vehicle.model).all()
+    return jsonify([m[0] for m in models])
+
+@app.route('/api/years/<brand>')
+def api_years_by_brand(brand):
+    """Belirli bir markaya ait tüm yılları döndür"""
+    years = db.session.query(Vehicle.yil).filter_by(marka=brand).distinct().order_by(Vehicle.yil.desc()).all()
+    return jsonify([y[0] for y in years])
+
+@app.route('/api/models/<brand>/<yil>')
+def api_models_by_year(brand, yil):
+    """Belirli bir marka ve yıla ait modelleri döndür"""
+    models = db.session.query(Vehicle.model).filter_by(
+        marka=brand, 
+        yil=yil
+    ).distinct().order_by(Vehicle.model).all()
     return jsonify([m[0] for m in models])
 
 @app.route('/api/years/<brand>/<model>')
