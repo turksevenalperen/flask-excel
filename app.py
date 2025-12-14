@@ -3,7 +3,7 @@ from flask_cors import CORS
 import pandas as pd
 import os
 from werkzeug.utils import secure_filename
-from models import db, Vehicle
+from models import db, Vehicle, User
 import threading
 import gc
 
@@ -328,6 +328,44 @@ def api_sigorta_sirketleri():
         return jsonify(list(vehicle.sigortalar.keys()))
     return jsonify([])
 
+@app.route('/api/siparis-kaydet', methods=['POST'])
+def api_siparis_kaydet():
+    """Kullanıcı sipariş bilgilerini kaydet"""
+    try:
+        data = request.get_json()
+        
+        user = User(
+            tc_kimlik=data['tcKimlik'],
+            tc_seri=data['tcFull'],
+            ad_soyad=f"{data['ad']} {data['soyad']}",
+            telefon=data['telefon'],
+            ruhsat_seri=data['ruhsatSeri'],
+            ruhsat_no=data['ruhsatNo'],
+            plaka=f"{data['plakaIl']} {data['plakaSeri']} {data['plakaNo']}",
+            marka=data['marka'],
+            model=data['model'],
+            yil=data['yil'],
+            secilen_sigorta=data['secilenSigorta'],
+            fiyat=data['fiyat'],
+            odeme_durumu='beklemede'
+        )
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Sipariş kaydedildi',
+            'siparis_id': user.id
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Hata: {str(e)}'
+        }), 400
+
 @app.route('/api/search')
 def api_search():
     """Marka veya model ile arama"""
@@ -345,6 +383,42 @@ def api_search():
     
     return jsonify([v.to_dict() for v in vehicles])
 
+# ==========================================
+# ADMIN ROUTES
+# ==========================================
+
+@app.route('/admin/siparisler')
+def admin_siparisler():
+    """Admin - Tüm siparişleri listele"""
+    try:
+        siparisler = User.query.order_by(User.created_at.desc()).all()
+        return jsonify([siparis.to_dict() for siparis in siparisler])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/siparis/<int:siparis_id>/durum-guncelle', methods=['POST'])
+def admin_siparis_durum_guncelle(siparis_id):
+    """Admin - Sipariş durumu güncelle"""
+    try:
+        data = request.get_json()
+        yeni_durum = data.get('durum')
+        
+        if yeni_durum not in ['beklemede', 'odendi', 'iptal']:
+            return jsonify({'error': 'Geçersiz durum'}), 400
+        
+        siparis = User.query.get_or_404(siparis_id)
+        siparis.odeme_durumu = yeni_durum
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Sipariş durumu güncellendi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/clear', methods=['POST'])
 def clear_data():
     """Tüm verileri temizle"""
@@ -357,6 +431,21 @@ def clear_data():
         flash(f'❌ Hata: {str(e)}', 'error')
     
     return redirect(url_for('index'))
+
+@app.route('/init-db')
+def init_db():
+    """Create all database tables"""
+    try:
+        db.create_all()
+        return jsonify({
+            'success': True,
+            'message': 'Database tables created successfully!',
+            'tables': ['vehicles', 'users']
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
