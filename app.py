@@ -248,6 +248,11 @@ def view_data():
     
     return render_template('view_data.html', vehicles=vehicles)
 
+@app.route('/admin-panel')
+def admin_panel():
+    """Admin Panel - Siparişler"""
+    return render_template('admin_panel.html')
+
 # ==========================================
 # API ROUTES
 # ==========================================

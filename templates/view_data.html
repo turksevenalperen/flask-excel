@@ -3,6 +3,19 @@
 {% block title %}Veriler - Admin Panel{% endblock %}
 
 {% block content %}
+<!-- Navigation -->
+<div class="card" style="background: #343a40; color: white; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+        <h2 style="margin: 0; color: white; font-size: 1.5em;">📋 Veri Görüntüleme</h2>
+        <div style="display: flex; gap: 15px;">
+            <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
+            <a href="/view" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;">📋 Verileri Gör</a>
+            <a href="/api/vehicles" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;" target="_blank">📡 JSON API</a>
+            <a href="/admin-panel" class="btn" style="background: #28a745; margin: 0; padding: 8px 20px;">👥 Siparişler</a>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <h1>📊 Kayıtlı Veriler</h1>
     <p class="subtitle">Toplam {{ vehicles.total }} kayıt</p>

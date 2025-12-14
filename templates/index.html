@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f8f9fa;
             min-height: 100vh;
             padding: 20px;
         }
@@ -25,17 +25,19 @@
         
         .card {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             padding: 40px;
             margin-bottom: 30px;
+            border: 1px solid #e9ecef;
         }
         
         h1 {
-            color: #667eea;
+            color: #212529;
             font-size: 2.5em;
             margin-bottom: 10px;
             text-align: center;
+            font-weight: 600;
         }
         
         .subtitle {
@@ -52,11 +54,13 @@
         }
         
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #495057;
             padding: 30px;
             border-radius: 15px;
             text-align: center;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         
         .stat-number {
@@ -71,24 +75,24 @@
         }
         
         .upload-area {
-            border: 3px dashed #667eea;
+            border: 3px dashed #dee2e6;
             border-radius: 15px;
             padding: 60px 20px;
             text-align: center;
-            background: #f8f9ff;
+            background: #f8f9fa;
             transition: all 0.3s;
             cursor: pointer;
         }
         
         .upload-area:hover {
-            border-color: #764ba2;
-            background: #f0f1ff;
+            border-color: #6c757d;
+            background: #e9ecef;
             transform: scale(1.02);
         }
         
         .upload-icon {
             font-size: 4em;
-            color: #667eea;
+            color: #6c757d;
             margin-bottom: 20px;
         }
         
@@ -97,13 +101,13 @@
         }
         
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #495057;
             color: white;
             border: none;
             padding: 15px 40px;
-            border-radius: 50px;
+            border-radius: 8px;
             font-size: 1.1em;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-block;
@@ -112,16 +116,33 @@
         }
         
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+            background: #343a40;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 58, 64, 0.3);
         }
         
         .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
         }
         
         .btn-danger {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-admin {
+            background: #28a745;
+        }
+        
+        .btn-admin:hover {
+            background: #218838;
         }
         
         .alert {
@@ -164,15 +185,17 @@
         }
         
         .sigorta-list {
-            background: #f8f9ff;
+            background: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
+            border: 1px solid #e9ecef;
         }
         
         .sigorta-list h3 {
-            color: #667eea;
+            color: #495057;
             margin-bottom: 15px;
+            font-weight: 600;
         }
         
         .sigorta-item {
@@ -180,14 +203,28 @@
             background: white;
             padding: 8px 15px;
             margin: 5px;
-            border-radius: 20px;
+            border-radius: 6px;
             font-size: 0.9em;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Admin Navigation -->
+        <div class="card" style="background: #343a40; color: white; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+                <h2 style="margin: 0; color: white; font-size: 1.5em;">🏢 Sigorta Admin Paneli</h2>
+                <div style="display: flex; gap: 15px;">
+                    <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
+                    <a href="/view" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;">📋 Verileri Gör</a>
+                    <a href="/api/vehicles" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;" target="_blank">📡 JSON API</a>
+                    <a href="/admin-panel" class="btn btn-admin" style="margin: 0; padding: 8px 20px;">👥 Siparişler</a>
+                </div>
+            </div>
+        </div>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -253,22 +290,22 @@
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0;">
                 <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #667eea;">📱 Marka:</label>
-                    <select id="markaSelect" style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #ddd; font-size: 1.1em;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #495057;">📱 Marka:</label>
+                    <select id="markaSelect" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 1.1em;">
                         <option value="">Marka Seçiniz</option>
                     </select>
                 </div>
                 
                 <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #667eea;">📅 Yıl:</label>
-                    <select id="yilSelect" style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #ddd; font-size: 1.1em;" disabled>
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #495057;">📅 Yıl:</label>
+                    <select id="yilSelect" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 1.1em;" disabled>
                         <option value="">Önce marka seçiniz</option>
                     </select>
                 </div>
                 
                 <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #667eea;">🚗 Model:</label>
-                    <select id="modelSelect" style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #ddd; font-size: 1.1em;" disabled>
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #495057;">🚗 Model:</label>
+                    <select id="modelSelect" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 1.1em;" disabled>
                         <option value="">Önce yıl seçiniz</option>
                     </select>
                 </div>
@@ -279,7 +316,7 @@
             </div>
             
             <div id="sonuclar" style="margin-top: 30px; display: none;">
-                <h3 style="color: #667eea; margin-bottom: 20px;">💳 Sigorta Fiyatları</h3>
+                <h3 style="color: #495057; margin-bottom: 20px; font-weight: 600;">💳 Sigorta Fiyatları</h3>
                 <div id="fiyatTablosu"></div>
             </div>
         </div>
