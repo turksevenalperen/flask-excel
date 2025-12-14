@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from models import db, Vehicle, User
 import threading
 import gc
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -408,7 +409,7 @@ def admin_siparis_durum_guncelle(siparis_id):
         data = request.get_json()
         yeni_durum = data.get('durum')
         
-        if yeni_durum not in ['beklemede', 'odendi', 'iptal']:
+        if yeni_durum not in ['beklemede', 'odendi']:
             return jsonify({'error': 'Geçersiz durum'}), 400
         
         siparis = User.query.get_or_404(siparis_id)
@@ -418,6 +419,51 @@ def admin_siparis_durum_guncelle(siparis_id):
         return jsonify({
             'success': True,
             'message': 'Sipariş durumu güncellendi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/siparis/<int:siparis_id>/sil', methods=['DELETE'])
+def admin_siparis_sil(siparis_id):
+    """Admin - Siparişi sil"""
+    try:
+        siparis = User.query.get_or_404(siparis_id)
+        db.session.delete(siparis)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Sipariş başarıyla silindi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/otomatik-temizlik', methods=['POST'])
+def admin_otomatik_temizlik():
+    """Admin - 12 saat geçen siparişleri otomatik sil"""
+    try:
+        from datetime import timedelta
+        
+        # 12 saat önce
+        on_iki_saat_once = datetime.utcnow() - timedelta(hours=12)
+        
+        # 12 saatten eski siparişleri bul ve sil
+        eski_siparisler = User.query.filter(User.created_at < on_iki_saat_once).all()
+        
+        silinen_sayisi = len(eski_siparisler)
+        
+        for siparis in eski_siparisler:
+            db.session.delete(siparis)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'{silinen_sayisi} adet eski sipariş temizlendi'
         })
         
     except Exception as e:
