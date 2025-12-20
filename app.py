@@ -7,7 +7,7 @@ from models import db, Vehicle, User
 import threading
 import gc
 from datetime import datetime
-
+a
 app = Flask(__name__)
 
 # CORS
@@ -444,15 +444,15 @@ def admin_siparis_sil(siparis_id):
 
 @app.route('/admin/otomatik-temizlik', methods=['POST'])
 def admin_otomatik_temizlik():
-    """Admin - 12 saat geçen siparişleri otomatik sil"""
+    """Admin - 48 saat geçen siparişleri otomatik sil"""
     try:
         from datetime import timedelta
         
-        # 12 saat önce
-        on_iki_saat_once = datetime.utcnow() - timedelta(hours=12)
+        # 48 saat önce (2 gün)
+        kirk_sekiz_saat_once = datetime.utcnow() - timedelta(hours=48)
         
-        # 12 saatten eski siparişleri bul ve sil
-        eski_siparisler = User.query.filter(User.created_at < on_iki_saat_once).all()
+        # 48 saatten eski siparişleri bul ve sil
+        eski_siparisler = User.query.filter(User.created_at < kirk_sekiz_saat_once).all()
         
         silinen_sayisi = len(eski_siparisler)
         
@@ -463,7 +463,7 @@ def admin_otomatik_temizlik():
         
         return jsonify({
             'success': True,
-            'message': f'{silinen_sayisi} adet eski sipariş temizlendi'
+            'message': f'{silinen_sayisi} adet eski sipariş temizlendi (48 saat geçenler)'
         })
         
     except Exception as e:
