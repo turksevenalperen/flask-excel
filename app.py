@@ -7,7 +7,7 @@ from models import db, Vehicle, User
 import threading
 import gc
 from datetime import datetime
-a
+
 app = Flask(__name__)
 
 # CORS
