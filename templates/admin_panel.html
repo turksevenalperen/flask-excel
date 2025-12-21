@@ -207,7 +207,7 @@
             transform: scale(1.1);
             background: #0056b3;
         }
-        /* Responsive helpers */
+        
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -215,19 +215,157 @@
         }
 
         @media (max-width: 768px) {
-            .container { padding: 12px; }
-            .card { padding: 20px; }
-            h1 { font-size: 1.6em; }
-            th, td { padding: 10px; font-size: 0.95em; }
-            .action-buttons { gap: 8px; }
-            .btn { padding: 10px 14px; font-size: 0.95em; }
+            body {
+                padding: 12px;
+            }
+            
+            .container { 
+                padding: 0;
+            }
+            
+            .card { 
+                padding: 20px;
+                border-radius: 10px;
+            }
+            
+            .nav-card > div {
+                flex-direction: column !important;
+                gap: 10px !important;
+                text-align: center;
+            }
+            
+            .nav-card h2 {
+                font-size: 1.2em !important;
+            }
+            
+            .nav-card > div > div {
+                flex-direction: column !important;
+                width: 100%;
+            }
+            
+            .nav-card .btn {
+                width: 100%;
+                margin: 3px 0 !important;
+                padding: 10px 20px !important;
+            }
+            
+            h1 { 
+                font-size: 1.6em;
+            }
+            
+            .subtitle {
+                font-size: 0.9em;
+            }
+            
+            th, td { 
+                padding: 10px;
+                font-size: 0.95em;
+            }
+            
+            .action-buttons { 
+                gap: 8px;
+            }
+            
+            .btn { 
+                padding: 10px 14px;
+                font-size: 0.95em;
+            }
+            
+            .btn-small {
+                padding: 6px 10px;
+                font-size: 0.85em;
+            }
+            
+            .refresh-btn {
+                width: 50px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 1.2em;
+            }
+            
+            .empty-state {
+                padding: 40px 20px;
+            }
+            
+            .empty-state h3 {
+                font-size: 1.5em;
+            }
+            
+            .empty-state p {
+                font-size: 1em;
+            }
         }
 
         @media (max-width: 480px) {
-            .card { padding: 14px; }
-            h1 { font-size: 1.25em; }
-            .refresh-btn { width: 50px; height: 50px; }
-            table { font-size: 0.9em; }
+            body {
+                padding: 8px;
+            }
+            
+            .card { 
+                padding: 14px;
+                border-radius: 8px;
+            }
+            
+            .nav-card {
+                padding: 14px;
+            }
+            
+            .nav-card h2 {
+                font-size: 1em !important;
+            }
+            
+            .nav-card .btn {
+                padding: 8px 12px !important;
+                font-size: 0.85em !important;
+            }
+            
+            h1 { 
+                font-size: 1.25em;
+            }
+            
+            .subtitle {
+                font-size: 0.85em;
+            }
+            
+            .refresh-btn { 
+                width: 45px;
+                height: 45px;
+                bottom: 15px;
+                right: 15px;
+                font-size: 1em;
+            }
+            
+            table { 
+                font-size: 0.8em;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+            }
+            
+            .btn-small {
+                padding: 5px 8px;
+                font-size: 0.75em;
+                margin: 1px;
+            }
+            
+            .status-badge {
+                padding: 4px 8px;
+                font-size: 0.75em;
+            }
+            
+            .empty-state {
+                padding: 30px 15px;
+            }
+            
+            .empty-state h3 {
+                font-size: 1.2em;
+            }
+            
+            .empty-state p {
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
