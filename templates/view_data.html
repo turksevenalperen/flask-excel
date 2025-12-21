@@ -5,9 +5,9 @@
 {% block content %}
 <!-- Navigation -->
 <div class="card" style="background: #343a40; color: white; margin-bottom: 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; flex-wrap: wrap; gap: 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
         <h2 style="margin: 0; color: white; font-size: 1.5em;">📋 Veri Görüntüleme</h2>
-        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 15px;">
             <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
             <a href="/view" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;">📋 Verileri Gör</a>
             <a href="/api/vehicles" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;" target="_blank">📡 JSON API</a>
@@ -26,7 +26,6 @@
     </div>
     
     {% if vehicles.items %}
-    <div class="table-responsive">
     <table>
         <thead>
             <tr>
@@ -51,7 +50,6 @@
             {% endfor %}
         </tbody>
     </table>
-    </div>
     
     <!-- Sayfalama -->
     <div class="pagination">
@@ -71,42 +69,4 @@
     </p>
     {% endif %}
 </div>
-
-<style>
-    @media (max-width: 768px) {
-        .card > div[style*="background: #343a40"] h2 {
-            font-size: 1.2em !important;
-            text-align: center;
-            width: 100%;
-        }
-        
-        .card > div[style*="background: #343a40"] > div:first-child {
-            justify-content: center !important;
-        }
-        
-        .card > div[style*="background: #343a40"] > div > div {
-            justify-content: center !important;
-            width: 100%;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .card > div[style*="background: #343a40"] h2 {
-            font-size: 1em !important;
-        }
-        
-        .card > div[style*="background: #343a40"] .btn {
-            padding: 6px 12px !important;
-            font-size: 0.85em !important;
-        }
-        
-        table {
-            font-size: 0.8em;
-        }
-        
-        th, td {
-            padding: 6px 4px !important;
-        }
-    }
-</style>
 {% endblock %}
