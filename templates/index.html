@@ -31,6 +31,37 @@
             margin-bottom: 30px;
             border: 1px solid #e9ecef;
         }
+
+        /* --- MOBIL UYUMLU NAVBAR CSS --- */
+        .admin-nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .admin-nav-buttons {
+            display: flex; 
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .admin-nav-wrapper {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .admin-nav-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+            }
+            .admin-nav-buttons .btn {
+                width: 100%;
+                margin: 0 !important;
+            }
+        }
+        /* ------------------------------- */
         
         h1 {
             color: #212529;
@@ -212,11 +243,10 @@
 </head>
 <body>
     <div class="container">
-        <!-- Admin Navigation -->
-        <div class="card" style="background: #343a40; color: white; margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+        <div class="card" style="background: #343a40; color: white; margin-bottom: 20px; padding: 20px;">
+            <div class="admin-nav-wrapper">
                 <h2 style="margin: 0; color: white; font-size: 1.5em;">🏢 Sigorta Admin Paneli</h2>
-                <div style="display: flex; gap: 15px;">
+                <div class="admin-nav-buttons">
                     <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
                     <a href="/view" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;">📋 Verileri Gör</a>
                     <a href="/api/vehicles" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;" target="_blank">📡 JSON API</a>
@@ -348,8 +378,8 @@
         });
         
         uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = '#667eea';
-            uploadArea.style.background = '#f8f9ff';
+            uploadArea.style.borderColor = '#dee2e6';
+            uploadArea.style.background = '#f8f9fa';
         });
         
         uploadArea.addEventListener('drop', (e) => {
@@ -357,13 +387,10 @@
             const file = e.dataTransfer.files[0];
             document.getElementById('fileInput').files = e.dataTransfer.files;
             document.getElementById('fileName').textContent = `Seçilen: ${file.name}`;
-            uploadArea.style.borderColor = '#667eea';
-            uploadArea.style.background = '#f8f9ff';
+            uploadArea.style.borderColor = '#6c757d';
         });
 
-        // ====== YENİ AKIŞ: MARKA → YIL → MODEL ======
         document.addEventListener('DOMContentLoaded', function() {
-            // Markaları yükle
             fetch('/api/brands')
                 .then(response => response.json())
                 .then(brands => {
@@ -374,29 +401,18 @@
                         option.textContent = brand;
                         markaSelect.appendChild(option);
                     });
-                })
-                .catch(error => console.error('Markalar yüklenirken hata:', error));
+                });
         });
 
-        // Marka seçildiğinde yılları yükle
         document.getElementById('markaSelect').addEventListener('change', function() {
             const selectedMarka = this.value;
             const yilSelect = document.getElementById('yilSelect');
             const modelSelect = document.getElementById('modelSelect');
-            const karsilastirBtn = document.getElementById('karsilastirBtn');
-
-            // Yıl ve model selectlerini sıfırla
             yilSelect.innerHTML = '<option value="">Yıl Seçiniz</option>';
             modelSelect.innerHTML = '<option value="">Önce yıl seçiniz</option>';
             yilSelect.disabled = !selectedMarka;
             modelSelect.disabled = true;
-            karsilastirBtn.disabled = true;
-            
-            // Sonuçları gizle
-            document.getElementById('sonuclar').style.display = 'none';
-
             if (selectedMarka) {
-                // Seçilen markaya ait yılları getir
                 fetch(`/api/years/${selectedMarka}`)
                     .then(response => response.json())
                     .then(years => {
@@ -406,30 +422,17 @@
                             option.textContent = year;
                             yilSelect.appendChild(option);
                         });
-                    })
-                    .catch(error => {
-                        console.error('Yıllar yüklenirken hata:', error);
-                        yilSelect.innerHTML = '<option value="">Hata: Yıllar yüklenemedi</option>';
                     });
             }
         });
 
-        // Yıl seçildiğinde modelleri yükle
         document.getElementById('yilSelect').addEventListener('change', function() {
             const selectedMarka = document.getElementById('markaSelect').value;
             const selectedYil = this.value;
             const modelSelect = document.getElementById('modelSelect');
-            const karsilastirBtn = document.getElementById('karsilastirBtn');
-
             modelSelect.innerHTML = '<option value="">Model Seçiniz</option>';
             modelSelect.disabled = !selectedYil;
-            karsilastirBtn.disabled = true;
-            
-            // Sonuçları gizle
-            document.getElementById('sonuclar').style.display = 'none';
-
             if (selectedMarka && selectedYil) {
-                // Seçilen marka ve yıla ait modelleri getir
                 fetch(`/api/models/${selectedMarka}/${selectedYil}`)
                     .then(response => response.json())
                     .then(models => {
@@ -439,76 +442,34 @@
                             option.textContent = model;
                             modelSelect.appendChild(option);
                         });
-                    })
-                    .catch(error => {
-                        console.error('Modeller yüklenirken hata:', error);
-                        modelSelect.innerHTML = '<option value="">Hata: Modeller yüklenemedi</option>';
                     });
             }
         });
 
-        // Model seçildiğinde karşılaştır butonunu aktifleştir
         document.getElementById('modelSelect').addEventListener('change', function() {
-            const karsilastirBtn = document.getElementById('karsilastirBtn');
-            karsilastirBtn.disabled = !this.value;
-            
-            // Sonuçları gizle
-            document.getElementById('sonuclar').style.display = 'none';
+            document.getElementById('karsilastirBtn').disabled = !this.value;
         });
 
-        // Karşılaştırma fonksiyonu
         function karsilastir() {
             const marka = document.getElementById('markaSelect').value;
             const yil = document.getElementById('yilSelect').value;
             const model = document.getElementById('modelSelect').value;
-
-            if (!marka || !yil || !model) {
-                alert('❌ Lütfen marka, yıl ve model seçiniz!');
-                return;
-            }
-
-            // Araç bilgisini getir
             fetch(`/api/vehicle/${marka}/${model}/${yil}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         const vehicle = data.data;
-                        
-                        let html = `
-                            <div style="background: #f8f9ff; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-                                <h4 style="color: #667eea; margin-bottom: 10px;">
-                                    🚗 ${vehicle.marka} ${vehicle.model} (${vehicle.yil})
-                                </h4>
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                        `;
-
-                        // Sigorta şirketlerini fiyata göre sırala
-                        const sigortalar = Object.entries(vehicle.sigortalar)
-                            .sort(([,a], [,b]) => a - b);
-
-                        sigortalar.forEach(([sirket, fiyat]) => {
-                            html += `
-                                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                        let html = `<div style="background: #f8f9ff; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                                    <h4 style="color: #667eea;">🚗 ${vehicle.marka} ${vehicle.model} (${vehicle.yil})</h4></div>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">`;
+                        Object.entries(vehicle.sigortalar).sort(([,a], [,b]) => a - b).forEach(([sirket, fiyat]) => {
+                            html += `<div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                                     <h5 style="color: #667eea; margin-bottom: 10px;">${sirket}</h5>
-                                    <div style="font-size: 1.8em; font-weight: bold; color: #28a745;">
-                                        ${fiyat.toLocaleString('tr-TR')} ₺
-                                    </div>
-                                </div>
-                            `;
+                                    <div style="font-size: 1.8em; font-weight: bold; color: #28a745;">${fiyat.toLocaleString('tr-TR')} ₺</div></div>`;
                         });
-
-                        html += '</div>';
-
-                        document.getElementById('fiyatTablosu').innerHTML = html;
+                        document.getElementById('fiyatTablosu').innerHTML = html + '</div>';
                         document.getElementById('sonuclar').style.display = 'block';
-                    } else {
-                        alert('❌ Bu araç için sigorta fiyatı bulunamadı!');
                     }
-                })
-                .catch(error => {
-                    console.error('Araç bilgileri alınırken hata:', error);
-                    alert('❌ Bir hata oluştu. Lütfen tekrar deneyin.');
                 });
         }
     </script>
