@@ -7,4 +7,4 @@ gunicorn==21.2.0
 psycopg2-binary==2.9.9
 flask-cors==4.0.0
 Pillow==10.4.0
-cloudinary==1.40.0      # <<--- BUNU EKLE
+cloudinary==1.40.0     
