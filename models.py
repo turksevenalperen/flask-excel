@@ -83,3 +83,77 @@ class User(db.Model):
     
     def __repr__(self):
         return f'<User {self.ad_soyad} {self.plaka}>'
+
+# YENİ - LOGO İÇİN
+class SiteSettings(db.Model):
+    __tablename__ = 'site_settings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    logo_path = db.Column(db.String(500))  # Logo dosya yolu
+    site_name = db.Column(db.String(100), default='SigortaApp')
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'logo_path': self.logo_path,
+            'site_name': self.site_name,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+    
+    def __repr__(self):
+        return f'<SiteSettings {self.site_name}>'
+
+# YENİ - BANKA HESAPLARI
+class BankAccount(db.Model):
+    __tablename__ = 'bank_accounts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    bank_name = db.Column(db.String(100), nullable=False)  # Banka Adı
+    iban = db.Column(db.String(50), nullable=False)  # IBAN
+    account_name = db.Column(db.String(100), nullable=False)  # Hesap Sahibi
+    branch = db.Column(db.String(100), nullable=False)  # Şube
+    is_active = db.Column(db.Boolean, default=True)  # Aktif mi?
+    order = db.Column(db.Integer, default=0)  # Sıralama
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'bank_name': self.bank_name,
+            'iban': self.iban,
+            'account_name': self.account_name,
+            'branch': self.branch,
+            'is_active': self.is_active,
+            'order': self.order,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
+    def __repr__(self):
+        return f'<BankAccount {self.bank_name}>'
+
+# YENİ - POLİÇE İPTAL TALEPLERİ
+class CancelRequest(db.Model):
+    __tablename__ = 'cancel_requests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)  # Ad Soyad
+    phone = db.Column(db.String(15), nullable=False)  # Telefon
+    plate = db.Column(db.String(15), nullable=False)  # Plaka
+    status = db.Column(db.String(20), default='beklemede')  # beklemede, tamamlandi, iptal
+    notes = db.Column(db.Text)  # Admin notları
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'phone': self.phone,
+            'plate': self.plate,
+            'status': self.status,
+            'notes': self.notes,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
+    def __repr__(self):
+        return f'<CancelRequest {self.name} - {self.plate}>'

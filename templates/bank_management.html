@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banka Hesapları Yönetimi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        
+        h1 {
+            color: #212529;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .btn {
+            background: #495057;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: #343a40;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        th {
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <div class="card" style="background: #343a40; color: white; margin-bottom: 20px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; color: white; font-size: 1.5em;">🏦 Banka Hesapları Yönetimi</h2>
+                <div style="display: flex; gap: 15px;">
+                    <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
+                    <a href="/admin-panel" class="btn" style="background: #28a745; margin: 0; padding: 8px 20px;">👥 Siparişler</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bank Accounts List -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 style="margin: 0; text-align: left;">Banka Hesapları</h1>
+                <button onclick="openAddModal()" class="btn btn-success">
+                    ➕ Yeni Hesap Ekle
+                </button>
+            </div>
+            
+            <div id="accounts-container">
+                <!-- Hesaplar buraya yüklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="accountModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Yeni Banka Hesabı Ekle</h2>
+            <form id="accountForm" style="margin-top: 30px;">
+                <input type="hidden" id="accountId">
+                
+                <div class="form-group">
+                    <label for="bankName">Banka Adı *</label>
+                    <input type="text" id="bankName" required placeholder="Örn: Ziraat Bankası">
+                </div>
+                
+                <div class="form-group">
+                    <label for="iban">IBAN *</label>
+                    <input type="text" id="iban" required placeholder="TR12 0001 0000 0000 0000 0000 01" maxlength="32">
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountName">Hesap Sahibi *</label>
+                    <input type="text" id="accountName" required placeholder="Örn: Sigorta Aracı A.Ş.">
+                </div>
+                
+                <div class="form-group">
+                    <label for="branch">Şube *</label>
+                    <input type="text" id="branch" required placeholder="Örn: Merkez Şubesi">
+                </div>
+                
+                <div class="form-group">
+                    <label for="order">Sıralama</label>
+                    <input type="number" id="order" value="0" placeholder="0">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isActive" checked> Aktif
+                    </label>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">
+                        Kaydet
+                    </button>
+                    <button type="button" onclick="closeModal()" class="btn" style="flex: 1; background: #6c757d;">
+                        İptal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sayfa yüklendiğinde hesapları getir
+        document.addEventListener('DOMContentLoaded', loadAccounts);
+
+        async function loadAccounts() {
+            try {
+                const response = await fetch('/admin/bank-accounts');
+                const accounts = await response.json();
+                
+                displayAccounts(accounts);
+            } catch (error) {
+                console.error('Hesaplar yüklenirken hata:', error);
+            }
+        }
+
+        function displayAccounts(accounts) {
+            const container = document.getElementById('accounts-container');
+            
+            if (!accounts || accounts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>🏦</h3>
+                        <p>Henüz banka hesabı eklenmemiş!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Banka</th>
+                            <th>IBAN</th>
+                            <th>Hesap Sahibi</th>
+                            <th>Şube</th>
+                            <th>Durum</th>
+                            <th>Sıra</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            accounts.forEach(account => {
+                html += `
+                    <tr>
+                        <td><strong>${account.bank_name}</strong></td>
+                        <td><code>${account.iban}</code></td>
+                        <td>${account.account_name}</td>
+                        <td>${account.branch}</td>
+                        <td>
+                            <span class="status-badge ${account.is_active ? 'status-active' : 'status-inactive'}">
+                                ${account.is_active ? 'Aktif' : 'Pasif'}
+                            </span>
+                        </td>
+                        <td>${account.order}</td>
+                        <td>
+                            <button onclick="editAccount(${account.id})" class="btn btn-warning btn-small">
+                                ✏️ Düzenle
+                            </button>
+                            <button onclick="toggleAccount(${account.id})" class="btn ${account.is_active ? 'btn-warning' : 'btn-success'} btn-small">
+                                ${account.is_active ? '⏸️ Pasif Yap' : '▶️ Aktif Yap'}
+                            </button>
+                            <button onclick="deleteAccount(${account.id})" class="btn btn-danger btn-small">
+                                🗑️ Sil
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Yeni Banka Hesabı Ekle';
+            document.getElementById('accountForm').reset();
+            document.getElementById('accountId').value = '';
+            document.getElementById('isActive').checked = true;
+            document.getElementById('accountModal').classList.add('active');
+        }
+
+        async function editAccount(id) {
+            try {
+                const response = await fetch('/admin/bank-accounts');
+                const accounts = await response.json();
+                const account = accounts.find(a => a.id === id);
+                
+                if (account) {
+                    document.getElementById('modalTitle').textContent = 'Banka Hesabını Düzenle';
+                    document.getElementById('accountId').value = account.id;
+                    document.getElementById('bankName').value = account.bank_name;
+                    document.getElementById('iban').value = account.iban;
+                    document.getElementById('accountName').value = account.account_name;
+                    document.getElementById('branch').value = account.branch;
+                    document.getElementById('order').value = account.order;
+                    document.getElementById('isActive').checked = account.is_active;
+                    document.getElementById('accountModal').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Hesap bilgileri alınırken hata:', error);
+            }
+        }
+
+        async function toggleAccount(id) {
+            try {
+                const response = await fetch(`/admin/bank-account/${id}/toggle`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ ${result.message}`);
+                    loadAccounts();
+                }
+            } catch (error) {
+                console.error('Durum değiştirilirken hata:', error);
+                alert('❌ Bir hata oluştu!');
+            }
+        }
+
+        async function deleteAccount(id) {
+            if (!confirm('Bu banka hesabını silmek istediğinize emin misiniz?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/bank-account/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Banka hesabı silindi!');
+                    loadAccounts();
+                }
+            } catch (error) {
+                console.error('Hesap silinirken hata:', error);
+                alert('❌ Bir hata oluştu!');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('accountModal').classList.remove('active');
+        }
+
+        document.getElementById('accountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const accountId = document.getElementById('accountId').value;
+            const data = {
+                bank_name: document.getElementById('bankName').value,
+                iban: document.getElementById('iban').value,
+                account_name: document.getElementById('accountName').value,
+                branch: document.getElementById('branch').value,
+                order: parseInt(document.getElementById('order').value),
+                is_active: document.getElementById('isActive').checked
+            };
+            
+            try {
+                let response;
+                if (accountId) {
+                    // Güncelleme
+                    response = await fetch(`/admin/bank-account/${accountId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Yeni ekleme
+                    response = await fetch('/admin/bank-account/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ ${result.message}`);
+                    closeModal();
+                    loadAccounts();
+                } else {
+                    alert(`❌ Hata: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Kayıt hatası:', error);
+                alert('❌ Bir hata oluştu!');
+            }
+        });
+
+        // Modal dışına tıklandığında kapat
+        document.getElementById('accountModal').addEventListener('click', (e) => {
+            if (e.target.id === 'accountModal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

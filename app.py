@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from PIL import Image
+
 from flask_cors import CORS
 import pandas as pd
 import os
@@ -7,6 +9,7 @@ from models import db, Vehicle, User
 import threading
 import gc
 from datetime import datetime
+from models import db, Vehicle, User, SiteSettings, BankAccount  # BankAccount ekleyin
 
 app = Flask(__name__)
 
@@ -254,6 +257,12 @@ def admin_panel():
     """Admin Panel - Siparişler"""
     return render_template('admin_panel.html')
 
+# YENİ - BANKA YÖNETİMİ SAYFASI
+@app.route('/bank-management')
+def bank_management():
+    """Banka hesapları yönetim sayfası"""
+    return render_template('bank_management.html')
+
 # ==========================================
 # API ROUTES
 # ==========================================
@@ -497,6 +506,379 @@ def init_db():
         return jsonify({
             'error': str(e)
         }), 500
+    
+    # ==========================================
+# LOGO YÖNETİMİ - ADMIN PANEL
+# ==========================================
+
+# Import'lara ekleyin (dosyanın başına):
+from models import db, Vehicle, User, SiteSettings  # SiteSettings ekleyin
+from PIL import Image
+import io
+
+# Logo klasörünü oluştur (with app.app_context()'ten sonra)
+LOGO_FOLDER = 'static/logos'
+os.makedirs(LOGO_FOLDER, exist_ok=True)
+
+# ==========================================
+# API ROUTES - LOGO
+# ==========================================
+
+@app.route('/api/logo')
+def api_logo():
+    """Frontend'e logo URL'sini döndür"""
+    try:
+        settings = SiteSettings.query.first()
+        if settings and settings.logo_path:
+            # Logo varsa URL'ini döndür
+            return jsonify({
+                'success': True,
+                'logo_url': f'/static/logos/{settings.logo_path}'
+            })
+        else:
+            # Logo yoksa null döndür
+            return jsonify({
+                'success': False,
+                'logo_url': None
+            })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/admin/upload-logo', methods=['POST'])
+def admin_upload_logo():
+    """Admin panelinden logo yükle"""
+    try:
+        if 'logo' not in request.files:
+            flash('❌ Logo dosyası seçilmedi!', 'error')
+            return redirect(url_for('index'))
+        
+        file = request.files['logo']
+        
+        if file.filename == '':
+            flash('❌ Dosya seçilmedi!', 'error')
+            return redirect(url_for('index'))
+        
+        # Dosya uzantısı kontrolü
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+        file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        
+        if file_ext not in allowed_extensions:
+            flash('❌ Sadece PNG, JPG, JPEG, GIF veya WEBP formatı kabul edilir!', 'error')
+            return redirect(url_for('index'))
+        
+        # Eski logoyu sil
+        settings = SiteSettings.query.first()
+        if settings and settings.logo_path:
+            old_logo = os.path.join(LOGO_FOLDER, settings.logo_path)
+            if os.path.exists(old_logo):
+                os.remove(old_logo)
+        
+        # Yeni dosya adı
+        filename = f'logo_{int(datetime.utcnow().timestamp())}.{file_ext}'
+        filepath = os.path.join(LOGO_FOLDER, filename)
+        
+        # Resmi optimize et
+        img = Image.open(file)
+        
+        # Maksimum boyut 500x500
+        max_size = (500, 500)
+        img.thumbnail(max_size, Image.Resampling.LANCZOS)
+        
+        # Kaydet
+        img.save(filepath, optimize=True, quality=85)
+        
+        # Veritabanına kaydet
+        if settings:
+            settings.logo_path = filename
+            settings.updated_at = datetime.utcnow()
+        else:
+            settings = SiteSettings(logo_path=filename)
+            db.session.add(settings)
+        
+        db.session.commit()
+        
+        flash('✅ Logo başarıyla güncellendi!', 'success')
+        return redirect(url_for('index'))
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'❌ Hata: {str(e)}', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/admin/delete-logo', methods=['POST'])
+def admin_delete_logo():
+    """Logoyu sil"""
+    try:
+        settings = SiteSettings.query.first()
+        
+        if settings and settings.logo_path:
+            # Dosyayı sil
+            logo_path = os.path.join(LOGO_FOLDER, settings.logo_path)
+            if os.path.exists(logo_path):
+                os.remove(logo_path)
+            
+            # Veritabanından sil
+            settings.logo_path = None
+            db.session.commit()
+            
+            flash('✅ Logo başarıyla silindi!', 'success')
+        else:
+            flash('⚠️ Silinecek logo bulunamadı!', 'warning')
+        
+        return redirect(url_for('index'))
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'❌ Hata: {str(e)}', 'error')
+        return redirect(url_for('index'))
+
+# ==========================================
+# BANKA HESAPLARI YÖNETİMİ - API ROUTES
+# ==========================================
+
+# Import'a ekleyin:
+from models import db, Vehicle, User, SiteSettings, BankAccount
+
+# ==========================================
+# FRONTEND İÇİN - BANKA HESAPLARI
+# ==========================================
+
+@app.route('/api/bank-accounts')
+def api_bank_accounts():
+    """Frontend'e aktif banka hesaplarını döndür"""
+    try:
+        accounts = BankAccount.query.filter_by(is_active=True).order_by(BankAccount.order).all()
+        return jsonify({
+            'success': True,
+            'accounts': [account.to_dict() for account in accounts]
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ==========================================
+# ADMIN - BANKA HESAPLARI YÖNETİMİ
+# ==========================================
+
+@app.route('/admin/bank-accounts')
+def admin_bank_accounts():
+    """Admin - Tüm banka hesaplarını listele"""
+    try:
+        accounts = BankAccount.query.order_by(BankAccount.order).all()
+        return jsonify([account.to_dict() for account in accounts])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/bank-account/add', methods=['POST'])
+def admin_add_bank_account():
+    """Admin - Yeni banka hesabı ekle"""
+    try:
+        data = request.get_json()
+        
+        account = BankAccount(
+            bank_name=data['bank_name'],
+            iban=data['iban'],
+            account_name=data['account_name'],
+            branch=data['branch'],
+            is_active=data.get('is_active', True),
+            order=data.get('order', 0)
+        )
+        
+        db.session.add(account)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Banka hesabı başarıyla eklendi',
+            'account': account.to_dict()
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/bank-account/<int:account_id>', methods=['PUT'])
+def admin_update_bank_account(account_id):
+    """Admin - Banka hesabını güncelle"""
+    try:
+        account = BankAccount.query.get_or_404(account_id)
+        data = request.get_json()
+        
+        account.bank_name = data.get('bank_name', account.bank_name)
+        account.iban = data.get('iban', account.iban)
+        account.account_name = data.get('account_name', account.account_name)
+        account.branch = data.get('branch', account.branch)
+        account.is_active = data.get('is_active', account.is_active)
+        account.order = data.get('order', account.order)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Banka hesabı güncellendi',
+            'account': account.to_dict()
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/bank-account/<int:account_id>/toggle', methods=['POST'])
+def admin_toggle_bank_account(account_id):
+    """Admin - Banka hesabını aktif/pasif yap"""
+    try:
+        account = BankAccount.query.get_or_404(account_id)
+        account.is_active = not account.is_active
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Hesap {"aktif" if account.is_active else "pasif"} edildi',
+            'is_active': account.is_active
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/bank-account/<int:account_id>', methods=['DELETE'])
+def admin_delete_bank_account(account_id):
+    """Admin - Banka hesabını sil"""
+    try:
+        account = BankAccount.query.get_or_404(account_id)
+        db.session.delete(account)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Banka hesabı silindi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+    
+    # ==========================================
+# POLİÇE İPTAL TALEPLERİ - API ROUTES
+# ==========================================
+
+# Import'a ekleyin:
+from models import db, Vehicle, User, SiteSettings, BankAccount, CancelRequest
+
+# ==========================================
+# FRONTEND - POLİÇE İPTAL KAYDET
+# ==========================================
+
+@app.route('/api/cancel-request', methods=['POST'])
+def api_cancel_request():
+    """Poliçe iptal talebi kaydet"""
+    try:
+        data = request.get_json()
+        
+        cancel_req = CancelRequest(
+            name=data['name'],
+            phone=data['phone'],
+            plate=data['plate'],
+            status='beklemede'
+        )
+        
+        db.session.add(cancel_req)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'İptal talebi kaydedildi',
+            'request_id': cancel_req.id
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Hata: {str(e)}'
+        }), 400
+
+# ==========================================
+# ADMIN - POLİÇE İPTAL TALEPLERİ
+# ==========================================
+
+@app.route('/admin/cancel-requests')
+def admin_cancel_requests():
+    """Admin - Tüm iptal taleplerini listele"""
+    try:
+        requests = CancelRequest.query.order_by(CancelRequest.created_at.desc()).all()
+        return jsonify([req.to_dict() for req in requests])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/cancel-request/<int:request_id>/status', methods=['POST'])
+def admin_update_cancel_status(request_id):
+    """Admin - İptal talebinin durumunu güncelle"""
+    try:
+        data = request.get_json()
+        new_status = data.get('status')
+        
+        if new_status not in ['beklemede', 'tamamlandi', 'iptal']:
+            return jsonify({'error': 'Geçersiz durum'}), 400
+        
+        cancel_req = CancelRequest.query.get_or_404(request_id)
+        cancel_req.status = new_status
+        
+        if 'notes' in data:
+            cancel_req.notes = data['notes']
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Durum güncellendi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/cancel-request/<int:request_id>', methods=['DELETE'])
+def admin_delete_cancel_request(request_id):
+    """Admin - İptal talebini sil"""
+    try:
+        cancel_req = CancelRequest.query.get_or_404(request_id)
+        db.session.delete(cancel_req)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'İptal talebi silindi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/cancel-request/<int:request_id>/notes', methods=['POST'])
+def admin_add_notes(request_id):
+    """Admin - İptal talebine not ekle"""
+    try:
+        data = request.get_json()
+        notes = data.get('notes', '')
+        
+        cancel_req = CancelRequest.query.get_or_404(request_id)
+        cancel_req.notes = notes
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Not eklendi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

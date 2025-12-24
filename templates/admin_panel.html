@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Siparişler</title>
+    <title>Admin Panel - Siparişler & İptal Talepleri</title>
     <style>
         * {
             margin: 0;
@@ -112,12 +112,41 @@
             margin: 2px;
         }
         
-        .action-buttons {
+        /* TABS */
+        .tabs {
             display: flex;
-            justify-content: center;
-            gap: 20px;
+            gap: 10px;
             margin-bottom: 30px;
-            flex-wrap: wrap;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: transparent;
+            border: none;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: #495057;
+        }
+        
+        .tab.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         table {
@@ -158,7 +187,7 @@
             border: 1px solid #ffeaa7;
         }
         
-        .status-odendi {
+        .status-odendi, .status-tamamlandi {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
@@ -187,25 +216,18 @@
             margin-bottom: 30px;
         }
         
-        .refresh-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 1.5em;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
-            transition: all 0.3s;
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
         }
         
-        .refresh-btn:hover {
-            transform: scale(1.1);
-            background: #0056b3;
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
         }
     </style>
 </head>
@@ -214,47 +236,85 @@
         <!-- Navigation -->
         <div class="card nav-card">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-                <h2 style="margin: 0; color: white; font-size: 1.5em;">🏢 Admin Panel - Siparişler</h2>
+                <h2 style="margin: 0; color: white; font-size: 1.5em;">🏢 Admin Panel</h2>
                 <div style="display: flex; gap: 15px;">
                     <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
                     <a href="/view" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;">📋 Verileri Gör</a>
                     <a href="/api/vehicles" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;" target="_blank">📡 JSON API</a>
-                    <button onclick="refreshData()" class="btn btn-success" style="margin: 0; padding: 8px 20px;">🔄 Yenile</button>
+                    <a href="/bank-management" class="btn" style="background: #17a2b8; margin: 0; padding: 8px 20px;">🏦 Banka Yönetimi</a>
+                    <button onclick="refreshAllData()" class="btn btn-success" style="margin: 0; padding: 8px 20px;">🔄 Yenile</button>
                 </div>
             </div>
         </div>
 
-        <!-- Siparişler Tablosu -->
+        <!-- Tabs -->
         <div class="card">
-            <h1>👥 Müşteri Siparişleri</h1>
-            <p class="subtitle">Tüm sigorta siparişlerinizi buradan takip edebilirsiniz</p>
-            
-            <div id="siparisler-container">
-                <!-- Siparişler buraya yüklenecek -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('siparisler')">
+                    🛒 Sigorta Siparişleri (<span id="siparis-count">0</span>)
+                </button>
+                <button class="tab" onclick="switchTab('iptaller')">
+                    ❌ Poliçe İptal Talepleri (<span id="iptal-count">0</span>)
+                </button>
+            </div>
+
+            <!-- SİPARİŞLER TAB -->
+            <div id="tab-siparisler" class="tab-content active">
+                <h1 style="margin-bottom: 30px;">👥 Müşteri Siparişleri</h1>
+                <div id="siparisler-container">
+                    <!-- Siparişler buraya yüklenecek -->
+                </div>
+            </div>
+
+            <!-- İPTAL TALEPLERİ TAB -->
+            <div id="tab-iptaller" class="tab-content">
+                <h1 style="margin-bottom: 30px;">❌ Poliçe İptal Talepleri</h1>
+                <div id="iptaller-container">
+                    <!-- İptal talepleri buraya yüklenecek -->
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Yenile Butonu -->
-    <button onclick="refreshData()" class="refresh-btn" title="Verileri Yenile">🔄</button>
-
     <script>
-        // Sayfa yüklendiğinde siparişleri getir
+        let currentTab = 'siparisler';
+
+        // Sayfa yüklendiğinde verileri getir
         document.addEventListener('DOMContentLoaded', function() {
-            loadSiparisler();
+            loadAllData();
         });
 
-        // Siparişleri API'den çek
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Tab butonlarını güncelle
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // İçerikleri göster/gizle
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        async function loadAllData() {
+            await loadSiparisler();
+            await loadIptalTalepleri();
+        }
+
+        function refreshAllData() {
+            loadAllData();
+        }
+
+        // SİPARİŞLER
         async function loadSiparisler() {
             try {
-                // Önce otomatik temizlik yap
-                await fetch('/admin/otomatik-temizlik', {
-                    method: 'POST'
-                });
+                // Önce otomatik temizlik
+                await fetch('/admin/otomatik-temizlik', { method: 'POST' });
                 
                 const response = await fetch('/admin/siparisler');
                 const siparisler = await response.json();
                 
+                document.getElementById('siparis-count').textContent = siparisler.length;
                 displaySiparisler(siparisler);
             } catch (error) {
                 console.error('Siparişler yüklenirken hata:', error);
@@ -267,7 +327,6 @@
             }
         }
 
-        // Siparişleri tabloda göster
         function displaySiparisler(siparisler) {
             const container = document.getElementById('siparisler-container');
             
@@ -276,7 +335,6 @@
                     <div class="empty-state">
                         <h3>📋</h3>
                         <p>Henüz hiç sipariş yok!</p>
-                        <p style="font-size: 1em; opacity: 0.7;">Müşteriler sipariş vermeye başladığında burada görünecektir.</p>
                     </div>
                 `;
                 return;
@@ -287,8 +345,8 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Müşteri Bilgileri</th>
-                            <th>Araç Bilgileri</th>
+                            <th>Müşteri</th>
+                            <th>Araç</th>
                             <th>Sigorta</th>
                             <th>Ödeme</th>
                             <th>Tarih</th>
@@ -304,12 +362,10 @@
                         <td><strong>#${siparis.id}</strong></td>
                         <td>
                             <strong>${siparis.ad_soyad}</strong><br>
-                            <small>📞 ${siparis.telefon}</small><br>
-                            <small>🆔 ${siparis.tc_kimlik}</small>
+                            <small>📞 ${siparis.telefon}</small>
                         </td>
                         <td>
                             <strong>${siparis.marka} ${siparis.model}</strong><br>
-                            <small>📅 ${siparis.yil}</small><br>
                             <small>🚗 ${siparis.plaka}</small>
                         </td>
                         <td>
@@ -318,24 +374,18 @@
                         </td>
                         <td>
                             <span class="status-badge status-${siparis.odeme_durumu}">
-                                ${getStatusText(siparis.odeme_durumu)}
+                                ${siparis.odeme_durumu === 'beklemede' ? 'Beklemede' : 'Ödendi'}
                             </span>
                         </td>
-                        <td>
-                            <small>${formatDate(siparis.created_at)}</small>
-                        </td>
+                        <td><small>${formatDate(siparis.created_at)}</small></td>
                         <td>
                             ${siparis.odeme_durumu === 'beklemede' 
-                                ? `<button onclick="updateStatus(${siparis.id}, 'odendi')" 
-                                           class="btn btn-success btn-small">
-                                       ✅ Ödendi
-                                   </button>` 
+                                ? `<button onclick="updateSiparisStatus(${siparis.id}, 'odendi')" 
+                                           class="btn btn-success btn-small">✅ Ödendi</button>` 
                                 : `<span class="status-badge status-odendi">✅ Ödendi</span>`
                             }
                             <button onclick="deleteSiparis(${siparis.id})" 
-                                    class="btn btn-danger btn-small">
-                                🗑️ Sil
-                            </button>
+                                    class="btn btn-danger btn-small">🗑️ Sil</button>
                         </td>
                     </tr>
                 `;
@@ -345,11 +395,30 @@
             container.innerHTML = html;
         }
 
-        // Siparişi sil
-        async function deleteSiparis(siparisId) {
-            if (!confirm('Bu siparişi silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
-                return;
+        async function updateSiparisStatus(siparisId, yeniDurum) {
+            try {
+                const response = await fetch(`/admin/siparis/${siparisId}/durum-guncelle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ durum: yeniDurum })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Sipariş durumu güncellendi!');
+                    loadSiparisler();
+                } else {
+                    alert(`❌ Hata: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Durum güncellenirken hata:', error);
+                alert('❌ Bir hata oluştu!');
             }
+        }
+
+        async function deleteSiparis(siparisId) {
+            if (!confirm('Bu siparişi silmek istediğinize emin misiniz?')) return;
             
             try {
                 const response = await fetch(`/admin/siparis/${siparisId}/sil`, {
@@ -359,63 +428,159 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert('✅ Sipariş başarıyla silindi!');
-                    loadSiparisler(); // Tabloyu yenile
-                } else {
-                    alert(`❌ Hata: ${result.error}`);
+                    alert('✅ Sipariş silindi!');
+                    loadSiparisler();
                 }
             } catch (error) {
-                console.error('Sipariş silinirken hata:', error);
-                alert('❌ Bir hata oluştu. Lütfen tekrar deneyin.');
+                console.error('Silme hatası:', error);
+                alert('❌ Bir hata oluştu!');
             }
         }
 
-        // Sipariş durumunu güncelle
-        async function updateStatus(siparisId, yeniDurum) {
+        // İPTAL TALEPLERİ
+        async function loadIptalTalepleri() {
             try {
-                const response = await fetch(`/admin/siparis/${siparisId}/durum-guncelle`, {
+                const response = await fetch('/admin/cancel-requests');
+                const talepler = await response.json();
+                
+                document.getElementById('iptal-count').textContent = talepler.length;
+                displayIptalTalepleri(talepler);
+            } catch (error) {
+                console.error('İptal talepleri yüklenirken hata:', error);
+            }
+        }
+
+        function displayIptalTalepleri(talepler) {
+            const container = document.getElementById('iptaller-container');
+            
+            if (!talepler || talepler.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>❌</h3>
+                        <p>Henüz hiç iptal talebi yok!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Müşteri</th>
+                            <th>Telefon</th>
+                            <th>Plaka</th>
+                            <th>Durum</th>
+                            <th>Notlar</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            talepler.forEach(talep => {
+                html += `
+                    <tr>
+                        <td><strong>#${talep.id}</strong></td>
+                        <td><strong>${talep.name}</strong></td>
+                        <td>📞 ${talep.phone}</td>
+                        <td>🚗 ${talep.plate}</td>
+                        <td>
+                            <span class="status-badge status-${talep.status}">
+                                ${getStatusText(talep.status)}
+                            </span>
+                        </td>
+                        <td>
+                            <textarea id="notes-${talep.id}" rows="2" placeholder="Not ekle...">${talep.notes || ''}</textarea>
+                            <button onclick="saveNotes(${talep.id})" class="btn btn-secondary btn-small" style="margin-top: 5px;">💾 Kaydet</button>
+                        </td>
+                        <td><small>${formatDate(talep.created_at)}</small></td>
+                        <td>
+                            <select onchange="updateIptalStatus(${talep.id}, this.value)" class="btn btn-small" style="padding: 8px;">
+                                <option value="beklemede" ${talep.status === 'beklemede' ? 'selected' : ''}>Beklemede</option>
+                                <option value="tamamlandi" ${talep.status === 'tamamlandi' ? 'selected' : ''}>Tamamlandı</option>
+                                <option value="iptal" ${talep.status === 'iptal' ? 'selected' : ''}>İptal</option>
+                            </select>
+                            <button onclick="deleteIptalTalebi(${talep.id})" class="btn btn-danger btn-small">🗑️ Sil</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function updateIptalStatus(requestId, status) {
+            try {
+                const response = await fetch(`/admin/cancel-request/${requestId}/status`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ durum: yeniDurum })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
                 });
 
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert(`✅ Sipariş durumu "${getDurumText(yeniDurum)}" olarak güncellendi!`);
-                    loadSiparisler(); // Tabloyu yenile
-                } else {
-                    alert(`❌ Hata: ${result.error}`);
+                    alert('✅ Durum güncellendi!');
+                    loadIptalTalepleri();
                 }
             } catch (error) {
                 console.error('Durum güncellenirken hata:', error);
-                alert('❌ Bir hata oluştu. Lütfen tekrar deneyin.');
+                alert('❌ Bir hata oluştu!');
             }
         }
 
-        // Verileri yenile
-        function refreshData() {
-            loadSiparisler();
+        async function saveNotes(requestId) {
+            const notes = document.getElementById(`notes-${requestId}`).value;
+            
+            try {
+                const response = await fetch(`/admin/cancel-request/${requestId}/notes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Not kaydedildi!');
+                }
+            } catch (error) {
+                console.error('Not kaydetme hatası:', error);
+                alert('❌ Bir hata oluştu!');
+            }
         }
 
-        // Yardımcı fonksiyonlar
+        async function deleteIptalTalebi(requestId) {
+            if (!confirm('Bu iptal talebini silmek istediğinize emin misiniz?')) return;
+            
+            try {
+                const response = await fetch(`/admin/cancel-request/${requestId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ İptal talebi silindi!');
+                    loadIptalTalepleri();
+                }
+            } catch (error) {
+                console.error('Silme hatası:', error);
+                alert('❌ Bir hata oluştu!');
+            }
+        }
+
         function getStatusText(status) {
             switch (status) {
                 case 'beklemede': return 'Beklemede';
-                case 'odendi': return 'Ödendi';
+                case 'tamamlandi': return 'Tamamlandı';
                 case 'iptal': return 'İptal';
+                case 'odendi': return 'Ödendi';
                 default: return status;
-            }
-        }
-
-        function getDurumText(durum) {
-            switch (durum) {
-                case 'beklemede': return 'Beklemede';
-                case 'odendi': return 'Ödendi';
-                case 'iptal': return 'İptal';
-                default: return durum;
             }
         }
 
@@ -425,7 +590,7 @@
         }
 
         // Auto refresh her 30 saniyede
-        setInterval(refreshData, 30000);
+        setInterval(loadAllData, 30000);
     </script>
 </body>
 </html>

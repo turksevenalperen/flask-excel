@@ -242,6 +242,93 @@
     </style>
 </head>
 <body>
+    <!-- index.html dosyanıza LOGO UPLOAD bölümünü ekleyin -->
+<!-- Stats kartlarından ÖNCE bu bölümü ekleyin -->
+
+<div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <h2 style="color: white; margin-bottom: 20px;">🖼️ Logo Yönetimi</h2>
+    <p style="color: rgba(255,255,255,0.9); margin-bottom: 30px;">
+        Sitenizin logosunu buradan yükleyebilir veya değiştirebilirsiniz
+    </p>
+    
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <!-- Mevcut Logo Önizleme -->
+        <div style="flex: 1; min-width: 200px;">
+            <div style="background: white; padding: 30px; border-radius: 15px; text-align: center;">
+                <p style="color: #495057; font-weight: 600; margin-bottom: 15px;">Mevcut Logo</p>
+                <div id="logoPreview" style="min-height: 150px; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: #999;">Logo yüklenmedi</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logo Yükleme Formu -->
+        <div style="flex: 1; min-width: 300px;">
+            <form action="/admin/upload-logo" method="post" enctype="multipart/form-data" style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px;">
+                <label for="logoInput" style="display: block; margin-bottom: 15px; font-weight: 600; color: white;">
+                    📁 Yeni Logo Seç
+                </label>
+                <input 
+                    type="file" 
+                    name="logo" 
+                    id="logoInput" 
+                    accept="image/*" 
+                    required
+                    style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3); background: white; margin-bottom: 20px; font-size: 1em;"
+                    onchange="previewLogo(this)"
+                >
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn" style="flex: 1; margin: 0; background: #28a745;">
+                        ✅ Yükle
+                    </button>
+                    <button type="button" class="btn btn-danger" style="flex: 1; margin: 0;" onclick="deleteLogo()">
+                        🗑️ Sil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sayfa yüklenince mevcut logoyu göster
+window.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/logo')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.logo_url) {
+                document.getElementById('logoPreview').innerHTML = 
+                    `<img src="${data.logo_url}?t=${Date.now()}" style="max-width: 200px; max-height: 150px; object-fit: contain;">`;
+            }
+        })
+        .catch(error => console.error('Logo yüklenemedi:', error));
+});
+
+// Dosya seçilince önizleme
+function previewLogo(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('logoPreview').innerHTML = 
+                `<img src="${e.target.result}" style="max-width: 200px; max-height: 150px; object-fit: contain;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Logo sil
+function deleteLogo() {
+    if (confirm('⚠️ Logoyu silmek istediğinize emin misiniz?')) {
+        fetch('/admin/delete-logo', {
+            method: 'POST'
+        })
+        .then(() => {
+            window.location.reload();
+        });
+    }
+}
+</script>
     <div class="container">
         <div class="card" style="background: #343a40; color: white; margin-bottom: 20px; padding: 20px;">
             <div class="admin-nav-wrapper">
