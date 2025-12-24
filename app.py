@@ -10,6 +10,9 @@ import threading
 import gc
 from datetime import datetime
 from models import db, Vehicle, User, SiteSettings, BankAccount  # BankAccount ekleyin
+from flask import send_from_directory
+import cloudinary
+import cloudinary.uploader
 
 app = Flask(__name__)
 
@@ -32,6 +35,13 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 }
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB
+
+# Cloudinary API bilgilerin BURAYA GERÇEK VERİLERİNİ YAZ!
+cloudinary.config(
+    cloud_name="df3lrtc5r",
+    api_key="381415224588128",
+    api_secret="mIyq5gMbnqygnWpHrPF-Pe_T5PM"
+)
 
 db.init_app(app)
 
@@ -526,83 +536,49 @@ os.makedirs(LOGO_FOLDER, exist_ok=True)
 
 @app.route('/api/logo')
 def api_logo():
-    """Frontend'e logo URL'sini döndür"""
     try:
         settings = SiteSettings.query.first()
         if settings and settings.logo_path:
-            # Logo varsa URL'ini döndür
-            return jsonify({
-                'success': True,
-                'logo_url': f'/static/logos/{settings.logo_path}'
-            })
+            return jsonify({'success': True, 'logo_url': settings.logo_path})
         else:
-            # Logo yoksa null döndür
-            return jsonify({
-                'success': False,
-                'logo_url': None
-            })
+            return jsonify({'success': False, 'logo_url': None})
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/admin/upload-logo', methods=['POST'])
 def admin_upload_logo():
-    """Admin panelinden logo yükle"""
     try:
         if 'logo' not in request.files:
             flash('❌ Logo dosyası seçilmedi!', 'error')
             return redirect(url_for('index'))
-        
         file = request.files['logo']
-        
         if file.filename == '':
             flash('❌ Dosya seçilmedi!', 'error')
             return redirect(url_for('index'))
-        
-        # Dosya uzantısı kontrolü
-        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-        file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
-        
-        if file_ext not in allowed_extensions:
-            flash('❌ Sadece PNG, JPG, JPEG, GIF veya WEBP formatı kabul edilir!', 'error')
-            return redirect(url_for('index'))
-        
-        # Eski logoyu sil
+
+        # Cloudinary'ye resmi yükle!
+        result = cloudinary.uploader.upload(
+            file,
+            folder="logos",
+            use_filename=True,
+            unique_filename=True,
+            resource_type="image"
+        )
+        url = result['secure_url']
+
+        # veritabanına kaydet
         settings = SiteSettings.query.first()
-        if settings and settings.logo_path:
-            old_logo = os.path.join(LOGO_FOLDER, settings.logo_path)
-            if os.path.exists(old_logo):
-                os.remove(old_logo)
-        
-        # Yeni dosya adı
-        filename = f'logo_{int(datetime.utcnow().timestamp())}.{file_ext}'
-        filepath = os.path.join(LOGO_FOLDER, filename)
-        
-        # Resmi optimize et
-        img = Image.open(file)
-        
-        # Maksimum boyut 500x500
-        max_size = (500, 500)
-        img.thumbnail(max_size, Image.Resampling.LANCZOS)
-        
-        # Kaydet
-        img.save(filepath, optimize=True, quality=85)
-        
-        # Veritabanına kaydet
         if settings:
-            settings.logo_path = filename
+            settings.logo_path = url
             settings.updated_at = datetime.utcnow()
         else:
-            settings = SiteSettings(logo_path=filename)
+            settings = SiteSettings(logo_path=url)
             db.session.add(settings)
-        
         db.session.commit()
-        
+
         flash('✅ Logo başarıyla güncellendi!', 'success')
         return redirect(url_for('index'))
-        
     except Exception as e:
         db.session.rollback()
         flash(f'❌ Hata: {str(e)}', 'error')
@@ -610,26 +586,15 @@ def admin_upload_logo():
 
 @app.route('/admin/delete-logo', methods=['POST'])
 def admin_delete_logo():
-    """Logoyu sil"""
     try:
         settings = SiteSettings.query.first()
-        
         if settings and settings.logo_path:
-            # Dosyayı sil
-            logo_path = os.path.join(LOGO_FOLDER, settings.logo_path)
-            if os.path.exists(logo_path):
-                os.remove(logo_path)
-            
-            # Veritabanından sil
             settings.logo_path = None
             db.session.commit()
-            
             flash('✅ Logo başarıyla silindi!', 'success')
         else:
             flash('⚠️ Silinecek logo bulunamadı!', 'warning')
-        
         return redirect(url_for('index'))
-        
     except Exception as e:
         db.session.rollback()
         flash(f'❌ Hata: {str(e)}', 'error')
@@ -879,6 +844,11 @@ def admin_add_notes(request_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+    
+    from flask import send_from_directory
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
