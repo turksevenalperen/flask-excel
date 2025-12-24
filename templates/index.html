@@ -1,564 +1,543 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sigorta Yönetim Paneli</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8f9fa;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 40px;
-            margin-bottom: 30px;
-            border: 1px solid #e9ecef;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sigorta Admin Paneli</title>
+  <link href="https://fonts.googleapis.com/css?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main: #667eea;
+      --main-dark: #4b5aba;
+      --accent: #b8c4ff;
+      --success: #46c07c;
+      --danger: #e93939;
+      --info: #17a2b8;
+      --surface: #fff;
+      --shadow: 0 4px 20px rgba(0,0,0,0.09);
+    }
+    * { box-sizing: border-box;}
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e7eafc 0%, #f6f7fa 100%);
+      padding: 0;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 28px auto;
+      padding: 0 10px;
+    }
+    .card, .content-card {
+      background: var(--surface);
+      border-radius: 22px;
+      margin-bottom: 26px;
+      box-shadow: var(--shadow);
+      padding: 34px 28px 32px 28px;
+      border: none;
+      position: relative;
+    }
+    .admin-header {
+      background: linear-gradient(100deg, var(--main) 0%, var(--main-dark) 100%);
+      color: #fff;
+      border-radius: 20px;
+      padding: 34px 24px 34px 168px;
+      position: relative;
+      margin-bottom: 38px;
+      overflow: hidden;
+      min-height: 105px;
+    }
+    .admin-header img {
+      position: absolute;
+      left: 36px; top: 26px;
+      width: 98px; height: 98px;
+      border-radius: 50%;
+      background: #fff;
+      object-fit: contain;
+      border: 2.5px solid #fff;
+      box-shadow: 0 4px 30px rgba(80,112,241,0.10);
+    }
+    .admin-header h1 {
+      font-size: 2.5em;
+      font-weight: 800;
+      margin: 0 0 8px 0;
+      text-shadow: 0 3px 8px rgba(60,60,80,.13);
+      line-height: 1.1;
+    }
+    .admin-header p { margin: 0; opacity: .96; font-size: 1.19em;}
+    @media (max-width:800px) {
+      .container { padding: 0 2vw; }
+      .admin-header { padding-left: 30px; min-height: 70px;}
+      .admin-header img { position: static; display: block; margin: 0 auto 14px auto; }
+      .admin-header h1 { font-size: 1.7em;}
+    }
 
-        /* --- MOBIL UYUMLU NAVBAR CSS --- */
-        .admin-nav-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-        }
+    /* Navbar */
+    .nav {
+      display: flex; flex-wrap: wrap; gap: 10px 12px; margin: 0 0 18px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .nav a, .nav button {
+      background: #f4f6fb;
+      color: #4254a8;
+      font-weight: 600;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 14px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all .21s;
+      text-decoration: none;
+      box-shadow: 0 2px 7px rgba(102,126,234,0.06);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .nav a.nav-active,
+    .nav a:hover, .nav button:hover {
+      background: var(--main);
+      color: #fff;
+      transform: translateY(-2.5px) scale(1.02);
+      box-shadow: 0 7px 22px rgba(102,126,234,0.05);
+    }
+    @media (max-width:600px) {
+      .nav { flex-direction: column; align-items: stretch; }
+      .nav a, .nav button { width: 100%; text-align: left; margin: 0; border-radius:10px; }
+    }
 
-        .admin-nav-buttons {
-            display: flex; 
-            gap: 15px;
-        }
+    /* Stat boxes */
+    .stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      justify-content: center;
+    }
+    .stat-box {
+      flex: 1 1 100px;
+      min-width: 170px;
+      max-width: 260px;
+      background: linear-gradient(120deg, var(--main) 0%, #86b7fe 100%);
+      color: #fff;
+      border-radius: 14px;
+      padding: 28px 14px 18px 16px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(70,100,200,0.07);
+      position: relative;
+    }
+    .stat-box .icon { font-size: 2.2em; opacity: 0.84; margin-bottom: 8px; }
+    .stat-box .num { font-size: 2.1em; font-weight: 700; margin-bottom: 2px; letter-spacing: 0.01em;}
+    .stat-box .label { letter-spacing: .03em; opacity:.98;}
+    @media (max-width:600px) {
+      .stats { flex-direction: column; gap: 12px;}
+      .stat-box { max-width: none; }
+    }
 
-        @media (max-width: 768px) {
-            .admin-nav-wrapper {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .admin-nav-buttons {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 8px;
-            }
-            .admin-nav-buttons .btn {
-                width: 100%;
-                margin: 0 !important;
-            }
-        }
-        /* ------------------------------- */
-        
-        h1 {
-            color: #212529;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .stat-card {
-            background: white;
-            color: #495057;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            border: 2px solid #e9ecef;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .stat-number {
-            font-size: 3em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .stat-label {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-        
-        .upload-area {
-            border: 3px dashed #dee2e6;
-            border-radius: 15px;
-            padding: 60px 20px;
-            text-align: center;
-            background: #f8f9fa;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .upload-area:hover {
-            border-color: #6c757d;
-            background: #e9ecef;
-            transform: scale(1.02);
-        }
-        
-        .upload-icon {
-            font-size: 4em;
-            color: #6c757d;
-            margin-bottom: 20px;
-        }
-        
-        input[type="file"] {
-            display: none;
-        }
-        
-        .btn {
-            background: #495057;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-block;
-            text-decoration: none;
-            margin: 10px;
-        }
-        
-        .btn:hover {
-            background: #343a40;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(52, 58, 64, 0.3);
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        
-        .btn-admin {
-            background: #28a745;
-        }
-        
-        .btn-admin:hover {
-            background: #218838;
-        }
-        
-        .alert {
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            font-weight: 500;
-            animation: slideIn 0.5s;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-left: 5px solid #28a745;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left: 5px solid #dc3545;
-        }
-        
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .sigorta-list {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .sigorta-list h3 {
-            color: #495057;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        
-        .sigorta-item {
-            display: inline-block;
-            background: white;
-            padding: 8px 15px;
-            margin: 5px;
-            border-radius: 6px;
-            font-size: 0.9em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
-        }
-    </style>
+    /* Logo yönetimi */
+    .logo-manage-flex {
+      display: flex; gap: 28px; flex-wrap: wrap;
+    }
+    .logo-card {
+      background: #fafdff;
+      padding: 28px 12px;
+      border-radius: 12px;
+      flex: 1 1 260px;
+      min-width: 220px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(100,120,200,.08);
+      margin-bottom: 12px;
+    }
+    .logo-card .logo-block {
+      min-height: 120px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 9px;
+    }
+    .logo-card img {
+      max-width: 160px; max-height: 120px; display: block; margin: 0 auto;
+      background: #fff; border-radius: 7px; border: 1.5px solid #eef1ff;
+      object-fit: contain;
+      padding: 10px;
+    }
+    .logo-card .btn-danger { margin-top: 10px;}
+    @media (max-width:700px) {
+      .logo-manage-flex { flex-direction: column;}
+      .logo-card { min-width: unset;}
+    }
+
+    /* Upload alanı */
+    .upload-area {
+      border: 3px dashed #dee2e6;
+      border-radius: 14px;
+      padding: 38px 12px;
+      text-align: center;
+      background: #f3f6fe;
+      transition: all 0.22s;
+      cursor: pointer;
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .upload-area:hover {
+      border-color: var(--main);
+      background: #e7f0ff;
+      transform: scale(1.011);
+    }
+    .upload-icon {
+      font-size: 2.5em; color: #7d89cb; margin-bottom: 16px; display: block;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+      display: flex; flex-wrap: wrap; gap: 14px; margin: 17px 0 0 0;
+      justify-content: center;
+    }
+    .action-buttons .btn { background: var(--main); color: #fff; font-weight:700; }
+    .action-buttons .btn-secondary { background: var(--info); color: #fff;}
+    .action-buttons .btn-danger { background: var(--danger);}
+    .action-buttons .btn:hover { background: var(--main-dark);}
+    .action-buttons .btn-secondary:hover { background: #097589; }
+    .action-buttons .btn-danger:hover { background: #b51212; }
+
+    /* Selects and forms */
+    select, input[type="file"], input[type="text"] {
+      padding: 13px;
+      font-size: 1.06em;
+      border-radius: 8px;
+      border: 2px solid #e9ecef;
+      margin-bottom: 5px;
+      background: #fafbff;
+      transition: border .18s;
+    }
+    select:focus, input[type="file"]:focus, input[type="text"]:focus {
+      border-color: var(--main);
+      outline: none;
+    }
+
+    label { font-weight: 600; color: var(--main-dark);}
+    .subtitle { text-align: center; color: #6f7da8; margin-bottom: 30px; }
+
+    /* Fiyat tablo */
+    .compare-table-cards {
+      margin-top: 18px;
+      display: grid; gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .compare-card {
+      background: #f7faff;
+      border: 2px solid #eaefff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(80,120,255,0.04);
+      text-align: center;
+      padding: 24px 6px;
+      transition: box-shadow .19s, transform .15s;
+    }
+    .compare-card:hover {
+      box-shadow: 0 10px 30px rgba(102,126,234,0.12);
+      transform: scale(1.016);
+      border-color: #b8c4ff;
+    }
+    .compare-card .company {
+      font-size: 1.16em;
+      font-weight: 700;
+      color: #4254a8;
+    }
+    .compare-card .price {
+      font-size: 2em;
+      color: var(--success);
+      font-weight: 800;
+      margin: 11px 0 0 0;
+    }
+
+    .list-inline {
+      display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0 0 0;
+    }
+    .inline-item {
+      background: #fafbff;
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-weight: 600;
+      color: #4358b8;
+      font-size: 0.98em;
+      border: 1.5px solid #eaeefa;
+    }
+    /* Alert/Flash */
+    .alert {
+      padding: 16px 24px;
+      border-radius: 13px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      animation: slideIn 0.5s;
+      font-size:1.12em;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0;}
+      to{ transform: translateY(0); opacity: 1;}
+    }
+    .alert-success {
+      background: #eaffea;
+      color: #287d38;
+      border-left: 5px solid #2dba53;
+    }
+    .alert-error {
+      background: #fbe9e9;
+      color: #ba3939;
+      border-left: 5px solid #e93939;
+    }
+    /* YATAY KAYABİLEN tablo/alan */
+    .scroll-x { overflow-x: auto; }
+  </style>
 </head>
 <body>
-    <!-- index.html dosyanıza LOGO UPLOAD bölümünü ekleyin -->
-<!-- Stats kartlarından ÖNCE bu bölümü ekleyin -->
-
-<div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-    <h2 style="color: white; margin-bottom: 20px;">🖼️ Logo Yönetimi</h2>
-    <p style="color: rgba(255,255,255,0.9); margin-bottom: 30px;">
-        Sitenizin logosunu buradan yükleyebilir veya değiştirebilirsiniz
-    </p>
-    
-    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-        <!-- Mevcut Logo Önizleme -->
-        <div style="flex: 1; min-width: 200px;">
-            <div style="background: white; padding: 30px; border-radius: 15px; text-align: center;">
-                <p style="color: #495057; font-weight: 600; margin-bottom: 15px;">Mevcut Logo</p>
-                <div id="logoPreview" style="min-height: 150px; display: flex; align-items: center; justify-content: center;">
-                    <span style="color: #999;">Logo yüklenmedi</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Logo Yükleme Formu -->
-        <div style="flex: 1; min-width: 300px;">
-            <form action="/admin/upload-logo" method="post" enctype="multipart/form-data" style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px;">
-                <label for="logoInput" style="display: block; margin-bottom: 15px; font-weight: 600; color: white;">
-                    📁 Yeni Logo Seç
-                </label>
-                <input 
-                    type="file" 
-                    name="logo" 
-                    id="logoInput" 
-                    accept="image/*" 
-                    required
-                    style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3); background: white; margin-bottom: 20px; font-size: 1em;"
-                    onchange="previewLogo(this)"
-                >
-                
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" class="btn" style="flex: 1; margin: 0; background: #28a745;">
-                        ✅ Yükle
-                    </button>
-                    <button type="button" class="btn btn-danger" style="flex: 1; margin: 0;" onclick="deleteLogo()">
-                        🗑️ Sil
-                    </button>
-                </div>
-            </form>
-        </div>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="admin-header">
+      <img id="panelLogo" src="" alt="Logo" />
+      <h1>SigortaApp Yönetim Paneli</h1>
+      <p>Verilerinizi, fiyat tablolarınızı ve logonuzu buradan yönetin</p>
     </div>
-</div>
 
-<script>
-// Sayfa yüklenince mevcut logoyu göster
-window.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/logo')
-        .then(response => response.json())
+    <!-- Navigation -->
+    <div class="nav">
+      <a href="/" class="">🏡 Ana Sayfa</a>
+      <a href="/view">📋 Kayıtları Görüntüle</a>
+      <a href="/api/vehicles" target="_blank">🔗 JSON API</a>
+      <a href="/admin-panel" class="nav-active">🛡️ Admin Kontrol</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- LOGO YÖNETIMI -->
+    <div class="content-card">
+      <h2 style="margin-top:0;">🖼️ Logo Yönetimi</h2>
+      <p class="subtitle" style="margin-top:-8px;">Firmanızın logosunu yükleyin/değiştirin.</p>
+      <div class="logo-manage-flex">
+        <div class="logo-card">
+          <div class="logo-block" id="logoPreview">
+            <span style="color:#b7bdcb;">Logo yok</span>
+          </div>
+        </div>
+        <div class="logo-card">
+          <form action="/admin/upload-logo" method="post" enctype="multipart/form-data" style="margin-bottom:10px;">
+            <label for="logoInput">📁 Yeni Logo Seçin:</label><br>
+            <input
+              type="file"
+              name="logo"
+              id="logoInput"
+              accept="image/*"
+              style="width: 100%;"
+              onchange="previewLogo(this)"
+              required>
+            <div class="action-buttons" style="margin: 17px 0 0 0;">
+              <button type="submit" class="btn">✅ Yükle</button>
+              <button type="button" class="btn btn-danger" onclick="deleteLogo()" style="margin-left: 6px;">🗑️ Sil</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- İSTATİSTİK KARTLARI -->
+    <div class="stats">
+      <div class="stat-box">
+        <div class="icon">📄</div>
+        <div class="num">{{ total_records }}</div>
+        <div class="label">Toplam Kayıt</div>
+      </div>
+      <div class="stat-box">
+        <div class="icon">🚗</div>
+        <div class="num">{{ unique_brands }}</div>
+        <div class="label">Benzersiz Marka</div>
+      </div>
+      <div class="stat-box">
+        <div class="icon">🏢</div>
+        <div class="num">{{ sigorta_sirketleri|length }}</div>
+        <div class="label">Sigorta Şirketi</div>
+      </div>
+    </div>
+
+    {% if sigorta_sirketleri %}
+    <div class="list-inline" style="margin-bottom:20px;">
+      <span style="font-weight:600;">💡 Açıktaki Sigorta Şirketleri:</span>
+      {% for sirket in sigorta_sirketleri %}
+        <span class="inline-item">{{ sirket }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- EXCEL UPLOAD -->
+    <div class="content-card">
+      <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+        <label for="fileInput" class="upload-area" id="uploadLabel">
+          <span class="upload-icon">📁</span>
+          <span style="font-size:1.13em;">Excel Dosyası Yükle (Trafik Sigorta Tablosu)</span>
+          <br>
+          <span style="font-size:.98em; color:#667eea;">Format: Marka | Model | Yıl | Şirket1 | Şirket2...</span>
+          <input type="file" name="file" id="fileInput" accept=".xlsx,.xls" required>
+        </label>
+        <div id="fileName" style="margin:9px 0 0 1px; color: #667eea; font-weight: 600;"></div>
+        <div class="action-buttons">
+          <button type="submit" class="btn">✅ Yükle & İşle</button>
+          <a href="/view" class="btn btn-secondary">📊 Kayıt Tablosu</a>
+          <a href="/api/vehicles" class="btn btn-secondary" target="_blank">🔗 JSON API</a>
+          <button type="button" class="btn btn-danger" onclick="confirmClear()">🗑️ Tümünü Sil</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- KARŞILAŞTIRMA -->
+    <div class="content-card">
+      <h2 style="margin-top:0;">🔍 Fiyat Karşılaştır</h2>
+      <p class="subtitle">Marka, yıl ve modeli seçerek kolayca fiyatları gör.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 24px; margin-bottom:22px;">
+        <div>
+          <label>Marka:</label>
+          <select id="markaSelect"><option value="">Marka Seçiniz</option></select>
+        </div>
+        <div>
+          <label>Yıl:</label>
+          <select id="yilSelect" disabled><option value="">Önce marka</option></select>
+        </div>
+        <div>
+          <label>Model:</label>
+          <select id="modelSelect" disabled><option value="">Önce yıl</option></select>
+        </div>
+      </div>
+      <div class="action-buttons" style="margin-top:10px;">
+        <button id="karsilastirBtn" class="btn" disabled onclick="karsilastir()">💰 Fiyatları Karşılaştır</button>
+      </div>
+      <div id="sonuclar" style="display:none; margin-top:28px;">
+        <div id="fiyatTablosu"></div>
+      </div>
+    </div>
+  </div>
+  <form id="clearForm" action="/clear" method="post" style="display: none;"></form>
+  <script>
+    // LOGO yükle/göster/sil
+    function showCurrentLogo() {
+      fetch('/api/logo')
+        .then(res => res.json())
         .then(data => {
-            if (data.success && data.logo_url) {
-                document.getElementById('logoPreview').innerHTML = 
-                    `<img src="${data.logo_url}?t=${Date.now()}" style="max-width: 200px; max-height: 150px; object-fit: contain;">`;
-            }
+          if (data.success && data.logo_url)
+            document.getElementById('panelLogo').src = data.logo_url+"?t="+Date.now(),
+            document.getElementById('logoPreview').innerHTML =
+              `<img src="${data.logo_url}?t=${Date.now()}" alt="Mevcut Logo">`;
+          else {
+            document.getElementById('logoPreview').innerHTML = '<span style="color:#bbb;">Logo yok</span>';
+            document.getElementById('panelLogo').src = "https://ui-avatars.com/api/?name=SigortaApp&background=667eea&color=fff";
+          }
         })
-        .catch(error => console.error('Logo yüklenemedi:', error));
-});
-
-// Dosya seçilince önizleme
-function previewLogo(input) {
-    if (input.files && input.files[0]) {
+    }
+    window.addEventListener('DOMContentLoaded', showCurrentLogo);
+    function previewLogo(input) {
+      if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('logoPreview').innerHTML = 
-                `<img src="${e.target.result}" style="max-width: 200px; max-height: 150px; object-fit: contain;">`;
+          document.getElementById('logoPreview').innerHTML =
+            `<img src="${e.target.result}" alt="Logo Önizleme">`;
         };
         reader.readAsDataURL(input.files[0]);
+      }
     }
-}
-
-// Logo sil
-function deleteLogo() {
-    if (confirm('⚠️ Logoyu silmek istediğinize emin misiniz?')) {
-        fetch('/admin/delete-logo', {
-            method: 'POST'
-        })
-        .then(() => {
-            window.location.reload();
-        });
+    function deleteLogo() {
+      if (confirm('Logoyu silmek istediğinize emin misiniz?'))
+        fetch('/admin/delete-logo', {method: 'POST'}).then(()=>window.location.reload());
     }
-}
-</script>
-    <div class="container">
-        <div class="card" style="background: #343a40; color: white; margin-bottom: 20px; padding: 20px;">
-            <div class="admin-nav-wrapper">
-                <h2 style="margin: 0; color: white; font-size: 1.5em;">🏢 Sigorta Admin Paneli</h2>
-                <div class="admin-nav-buttons">
-                    <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
-                    <a href="/view" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;">📋 Verileri Gör</a>
-                    <a href="/api/vehicles" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;" target="_blank">📡 JSON API</a>
-                    <a href="/admin-panel" class="btn btn-admin" style="margin: 0; padding: 8px 20px;">👥 Siparişler</a>
-                </div>
-            </div>
-        </div>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <div class="card">
-            <h1>🏢 Sigorta Fiyat Yönetimi</h1>
-            <p class="subtitle">Excel dosyanızı yükleyin, otomatik olarak işlensin!</p>
-            
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number">{{ total_records }}</div>
-                    <div class="stat-label">Toplam Kayıt</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">{{ unique_brands }}</div>
-                    <div class="stat-label">Marka Sayısı</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">{{ sigorta_sirketleri|length }}</div>
-                    <div class="stat-label">Sigorta Şirketi</div>
-                </div>
-            </div>
-            
-            {% if sigorta_sirketleri %}
-            <div class="sigorta-list">
-                <h3>📋 Sistemdeki Sigorta Şirketleri:</h3>
-                {% for sirket in sigorta_sirketleri %}
-                    <span class="sigorta-item">{{ sirket }}</span>
-                {% endfor %}
-            </div>
-            {% endif %}
-            
-            <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
-                <label for="fileInput" class="upload-area">
-                    <div class="upload-icon">📁</div>
-                    <h2>Excel Dosyası Yükle</h2>
-                    <p style="margin-top: 10px; color: #666;">
-                        Tıklayın veya dosyayı sürükleyin<br>
-                        <small>(Format: MARKA | MODEL | YIL | Sigorta Şirketleri...)</small>
-                    </p>
-                    <input type="file" name="file" id="fileInput" accept=".xlsx,.xls" required>
-                    <div id="fileName" style="margin-top: 20px; color: #667eea; font-weight: bold;"></div>
-                </label>
-                
-                <div class="action-buttons">
-                    <button type="submit" class="btn">✅ Yükle ve İşle</button>
-                    <a href="/view" class="btn btn-secondary">📊 Verileri Görüntüle</a>
-                    <a href="/api/vehicles" class="btn btn-secondary" target="_blank">📡 JSON API</a>
-                    <button type="button" class="btn btn-danger" onclick="confirmClear()">🗑️ Tümünü Temizle</button>
-                </div>
-            </form>
-        </div>
-        
-        <div class="card">
-            <h2>🔍 Sigorta Fiyat Karşılaştırması</h2>
-            <p class="subtitle">Marka ve yıl seçerek araçların sigorta fiyatlarını karşılaştırın</p>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0;">
-                <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #495057;">📱 Marka:</label>
-                    <select id="markaSelect" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 1.1em;">
-                        <option value="">Marka Seçiniz</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #495057;">📅 Yıl:</label>
-                    <select id="yilSelect" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 1.1em;" disabled>
-                        <option value="">Önce marka seçiniz</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #495057;">🚗 Model:</label>
-                    <select id="modelSelect" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 1.1em;" disabled>
-                        <option value="">Önce yıl seçiniz</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="action-buttons">
-                <button id="karsilastirBtn" class="btn" disabled onclick="karsilastir()">💰 Fiyatları Karşılaştır</button>
-            </div>
-            
-            <div id="sonuclar" style="margin-top: 30px; display: none;">
-                <h3 style="color: #495057; margin-bottom: 20px; font-weight: 600;">💳 Sigorta Fiyatları</h3>
-                <div id="fiyatTablosu"></div>
-            </div>
-        </div>
-    </div>
+    // Dosya seçilince adını yaz
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      document.getElementById('fileName').textContent = f ? `Seçildi: ${f.name}` : '';
+    });
 
-    <form id="clearForm" action="/clear" method="post" style="display: none;"></form>
+    // Temizle onayı
+    function confirmClear() {
+      if (confirm('⚠️ Tüm veriler silinecek. Emin misiniz?'))
+        document.getElementById('clearForm').submit();
+    }
 
-    <script>
-        // Dosya seçildiğinde ismini göster
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name || '';
-            document.getElementById('fileName').textContent = fileName ? `Seçilen: ${fileName}` : '';
+    // Excel upload alanı drag/drop styling
+    const uploadArea = document.getElementById('uploadLabel');
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault(); uploadArea.style.borderColor = "#667eea"; uploadArea.style.background = "#e7f0ff";
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = "#dee2e6"; uploadArea.style.background = "#f3f6fe";
+    });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault(); const file = e.dataTransfer.files[0];
+      document.getElementById('fileInput').files = e.dataTransfer.files;
+      document.getElementById('fileName').textContent = `Seçildi: ${file.name}`;
+      uploadArea.style.borderColor = "#667eea";
+    });
+
+    // Fiyat filtreleri dinamik
+    document.addEventListener('DOMContentLoaded', ()=>{
+      fetch('/api/brands').then(res=>res.json()).then(brands=>{
+        const markaSelect=document.getElementById('markaSelect');
+        brands.forEach(brand=>{
+          const o=document.createElement('option');
+          o.value=brand; o.textContent=brand; markaSelect.appendChild(o);
         });
-        
-        // Temizleme onayı
-        function confirmClear() {
-            if (confirm('⚠️ TÜM VERİLER SİLİNECEK! Emin misiniz?')) {
-                document.getElementById('clearForm').submit();
-            }
+      });
+    });
+    document.getElementById('markaSelect').addEventListener('change', function() {
+      const m=this.value, yilSelect=document.getElementById('yilSelect'), modelSelect=document.getElementById('modelSelect');
+      yilSelect.innerHTML='<option value="">Yıl Seçiniz</option>'; modelSelect.innerHTML='<option value="">Önce yıl</option>';
+      yilSelect.disabled=!m; modelSelect.disabled=true;
+      if(m) fetch(`/api/years/${m}`).then(r=>r.json()).then(years=>{
+        years.forEach(y=>{
+          const o=document.createElement('option'); o.value=y;o.textContent=y;yilSelect.appendChild(o);
+        });
+      });
+    });
+    document.getElementById('yilSelect').addEventListener('change', function() {
+      const m=document.getElementById('markaSelect').value, y=this.value, modelSelect=document.getElementById('modelSelect');
+      modelSelect.innerHTML='<option value="">Model Seçiniz</option>'; modelSelect.disabled=!y;
+      if(m&&y)fetch(`/api/models/${m}/${y}`).then(r=>r.json()).then(models=>{
+        models.forEach(model=>{
+          const o=document.createElement('option'); o.value=model; o.textContent=model; modelSelect.appendChild(o);
+        });
+      });
+    });
+    document.getElementById('modelSelect').addEventListener('change', function() {
+      document.getElementById('karsilastirBtn').disabled=!this.value;
+    });
+
+    function karsilastir() {
+      const m=document.getElementById('markaSelect').value,
+        y=document.getElementById('yilSelect').value,
+        mo=document.getElementById('modelSelect').value;
+      fetch(`/api/vehicle/${m}/${mo}/${y}`)
+      .then(r=>r.json()).then(data=>{
+        if(data.success){
+          const v=data.data, t=document.getElementById('fiyatTablosu');
+          let html=`
+            <div style="text-align:center;margin-bottom:17px;">
+              <span style="font-size:1.14em;color:var(--main);font-weight:800;">${v.marka} ${v.model} (${v.yil})</span>
+            </div>
+            <div class="compare-table-cards">
+          `;
+          Object.entries(v.sigortalar).sort(([,a],[,b])=>a-b).forEach(([sirket,fiyat])=>{
+            html+=`
+            <div class="compare-card">
+              <div class="company">${sirket}</div>
+              <div class="price">${fiyat.toLocaleString('tr-TR')} ₺</div>
+            </div>`;
+          });
+          html+='</div>';
+          t.innerHTML=html;
+          document.getElementById('sonuclar').style.display='block';
         }
-        
-        // Drag & Drop desteği
-        const uploadArea = document.querySelector('.upload-area');
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#764ba2';
-            uploadArea.style.background = '#f0f1ff';
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = '#dee2e6';
-            uploadArea.style.background = '#f8f9fa';
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const file = e.dataTransfer.files[0];
-            document.getElementById('fileInput').files = e.dataTransfer.files;
-            document.getElementById('fileName').textContent = `Seçilen: ${file.name}`;
-            uploadArea.style.borderColor = '#6c757d';
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/brands')
-                .then(response => response.json())
-                .then(brands => {
-                    const markaSelect = document.getElementById('markaSelect');
-                    brands.forEach(brand => {
-                        const option = document.createElement('option');
-                        option.value = brand;
-                        option.textContent = brand;
-                        markaSelect.appendChild(option);
-                    });
-                });
-        });
-
-        document.getElementById('markaSelect').addEventListener('change', function() {
-            const selectedMarka = this.value;
-            const yilSelect = document.getElementById('yilSelect');
-            const modelSelect = document.getElementById('modelSelect');
-            yilSelect.innerHTML = '<option value="">Yıl Seçiniz</option>';
-            modelSelect.innerHTML = '<option value="">Önce yıl seçiniz</option>';
-            yilSelect.disabled = !selectedMarka;
-            modelSelect.disabled = true;
-            if (selectedMarka) {
-                fetch(`/api/years/${selectedMarka}`)
-                    .then(response => response.json())
-                    .then(years => {
-                        years.forEach(year => {
-                            const option = document.createElement('option');
-                            option.value = year;
-                            option.textContent = year;
-                            yilSelect.appendChild(option);
-                        });
-                    });
-            }
-        });
-
-        document.getElementById('yilSelect').addEventListener('change', function() {
-            const selectedMarka = document.getElementById('markaSelect').value;
-            const selectedYil = this.value;
-            const modelSelect = document.getElementById('modelSelect');
-            modelSelect.innerHTML = '<option value="">Model Seçiniz</option>';
-            modelSelect.disabled = !selectedYil;
-            if (selectedMarka && selectedYil) {
-                fetch(`/api/models/${selectedMarka}/${selectedYil}`)
-                    .then(response => response.json())
-                    .then(models => {
-                        models.forEach(model => {
-                            const option = document.createElement('option');
-                            option.value = model;
-                            option.textContent = model;
-                            modelSelect.appendChild(option);
-                        });
-                    });
-            }
-        });
-
-        document.getElementById('modelSelect').addEventListener('change', function() {
-            document.getElementById('karsilastirBtn').disabled = !this.value;
-        });
-
-        function karsilastir() {
-            const marka = document.getElementById('markaSelect').value;
-            const yil = document.getElementById('yilSelect').value;
-            const model = document.getElementById('modelSelect').value;
-            fetch(`/api/vehicle/${marka}/${model}/${yil}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const vehicle = data.data;
-                        let html = `<div style="background: #f8f9ff; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-                                    <h4 style="color: #667eea;">🚗 ${vehicle.marka} ${vehicle.model} (${vehicle.yil})</h4></div>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">`;
-                        Object.entries(vehicle.sigortalar).sort(([,a], [,b]) => a - b).forEach(([sirket, fiyat]) => {
-                            html += `<div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
-                                    <h5 style="color: #667eea; margin-bottom: 10px;">${sirket}</h5>
-                                    <div style="font-size: 1.8em; font-weight: bold; color: #28a745;">${fiyat.toLocaleString('tr-TR')} ₺</div></div>`;
-                        });
-                        document.getElementById('fiyatTablosu').innerHTML = html + '</div>';
-                        document.getElementById('sonuclar').style.display = 'block';
-                    }
-                });
-        }
-    </script>
+      });
+    }
+  </script>
 </body>
 </html>

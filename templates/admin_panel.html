@@ -4,61 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Siparişler & İptal Talepleri</title>
+    <link href="https://fonts.googleapis.com/css?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8f9fa;
             min-height: 100vh;
-            padding: 20px;
         }
-        
         .container {
-            max-width: 1400px;
+            max-width: 100%;
+            padding: 8px;
             margin: 0 auto;
         }
-        
+        @media (min-width: 600px) {
+            .container { max-width: 1400px; padding: 20px; }
+        }
+
         .card {
             background: white;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 40px;
-            margin-bottom: 30px;
+            padding: 10px;
+            margin-bottom: 24px;
             border: 1px solid #e9ecef;
         }
-        
+        @media (min-width: 768px) {
+            .card { padding: 40px; }
+        }
+
         .nav-card {
             background: #343a40;
             color: white;
             margin-bottom: 20px;
         }
-        
         h1 {
             color: #212529;
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
             text-align: center;
             font-weight: 600;
         }
-        
         .subtitle {
             text-align: center;
             color: #666;
             margin-bottom: 30px;
         }
-        
         .btn {
             background: #495057;
             color: white;
             border: none;
             padding: 15px 40px;
             border-radius: 8px;
-            font-size: 1.1em;
+            font-size: 1.05em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -66,168 +68,146 @@
             text-decoration: none;
             margin: 10px;
         }
-        
         .btn:hover {
             background: #343a40;
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(52, 58, 64, 0.3);
         }
-        
-        .btn-secondary {
-            background: #6c757d;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .btn-success {
-            background: #28a745;
-        }
-        
-        .btn-success:hover {
-            background: #218838;
-        }
-        
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 0.9em;
-            margin: 2px;
-        }
-        
-        /* TABS */
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-small { padding: 8px 16px; font-size: 0.96em; margin: 2px; }
+
         .tabs {
             display: flex;
             gap: 10px;
             margin-bottom: 30px;
             border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
         }
-        
         .tab {
-            padding: 15px 30px;
+            padding: 13px 20px;
             background: transparent;
             border: none;
-            font-size: 1.2em;
+            font-size: 1.09em;
             font-weight: 600;
             cursor: pointer;
             color: #6c757d;
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
         }
-        
-        .tab:hover {
-            color: #495057;
-        }
-        
+        .tab:hover { color: #495057; }
         .tab.active {
             color: #007bff;
             border-bottom-color: #007bff;
         }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .table-responsive { overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             background: white;
+            min-width: 600px;
         }
-        
         th, td {
-            padding: 15px;
+            padding: 13px 10px;
             text-align: left;
             border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
         }
-        
         th {
             background: #f8f9fa;
             color: #495057;
             font-weight: 600;
             border-bottom: 2px solid #dee2e6;
         }
-        
         tr:hover {
             background: #f8f9fa;
         }
-        
         .status-badge {
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.85em;
+            font-size: 0.88em;
             font-weight: 600;
             text-transform: uppercase;
         }
-        
         .status-beklemede {
             background: #fff3cd;
             color: #856404;
             border: 1px solid #ffeaa7;
         }
-        
         .status-odendi, .status-tamamlandi {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        
         .status-iptal {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        
         .empty-state {
             text-align: center;
-            padding: 80px 40px;
+            padding: 60px 10px;
             color: #6c757d;
         }
-        
         .empty-state h3 {
             font-size: 2em;
             margin-bottom: 15px;
             opacity: 0.7;
         }
-        
-        .empty-state p {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-        }
-        
+        .empty-state p { font-size: 1.05em; margin-bottom: 22px; }
         textarea {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
             font-family: inherit;
             resize: vertical;
         }
-        
         textarea:focus {
             outline: none;
             border-color: #667eea;
+        }
+        /* RESPONSIVE BOOST */
+        @media (max-width: 900px) {
+            table { min-width: 480px; font-size: 0.97em; }
+            th, td { padding: 8px; }
+        }
+        @media (max-width: 600px) {
+            .container { padding: 2px; }
+            .card { padding: 7px; }
+            .btn, .btn-secondary, .btn-success, .btn-warning, .btn-danger {
+                display: block;
+                width: 100%;
+                margin: 6px 0 !important;
+                font-size: 1em;
+            }
+            .nav-card > div {
+                flex-direction: column !important;
+                gap: 0 !important;
+            }
+            .tabs {
+                flex-direction: column;
+                gap: 0;
+            }
+            .tab {
+                width: 100%;
+                font-size: 1em;
+                padding: 10px 18px;
+                border-radius: 0;
+                text-align: left;
+            }
+            .table-responsive { margin: 0 -8px; }
+            table { font-size: 0.94em; }
         }
     </style>
 </head>
@@ -235,9 +215,9 @@
     <div class="container">
         <!-- Navigation -->
         <div class="card nav-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 10px 0;">
                 <h2 style="margin: 0; color: white; font-size: 1.5em;">🏢 Admin Panel</h2>
-                <div style="display: flex; gap: 15px;">
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
                     <a href="/view" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;">📋 Verileri Gör</a>
                     <a href="/api/vehicles" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;" target="_blank">📡 JSON API</a>
@@ -250,17 +230,17 @@
         <!-- Tabs -->
         <div class="card">
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('siparisler')">
+                <button class="tab active" onclick="switchTab('siparisler', event)">
                     🛒 Sigorta Siparişleri (<span id="siparis-count">0</span>)
                 </button>
-                <button class="tab" onclick="switchTab('iptaller')">
+                <button class="tab" onclick="switchTab('iptaller', event)">
                     ❌ Poliçe İptal Talepleri (<span id="iptal-count">0</span>)
                 </button>
             </div>
 
             <!-- SİPARİŞLER TAB -->
             <div id="tab-siparisler" class="tab-content active">
-                <h1 style="margin-bottom: 30px;">👥 Müşteri Siparişleri</h1>
+                <h1 style="margin-bottom: 28px;">👥 Müşteri Siparişleri</h1>
                 <div id="siparisler-container">
                     <!-- Siparişler buraya yüklenecek -->
                 </div>
@@ -268,7 +248,7 @@
 
             <!-- İPTAL TALEPLERİ TAB -->
             <div id="tab-iptaller" class="tab-content">
-                <h1 style="margin-bottom: 30px;">❌ Poliçe İptal Talepleri</h1>
+                <h1 style="margin-bottom: 28px;">❌ Poliçe İptal Talepleri</h1>
                 <div id="iptaller-container">
                     <!-- İptal talepleri buraya yüklenecek -->
                 </div>
@@ -279,19 +259,14 @@
     <script>
         let currentTab = 'siparisler';
 
-        // Sayfa yüklendiğinde verileri getir
         document.addEventListener('DOMContentLoaded', function() {
             loadAllData();
         });
 
-        function switchTab(tab) {
+        function switchTab(tab, event) {
             currentTab = tab;
-            
-            // Tab butonlarını güncelle
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-            
-            // İçerikleri göster/gizle
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
         }
@@ -308,12 +283,9 @@
         // SİPARİŞLER
         async function loadSiparisler() {
             try {
-                // Önce otomatik temizlik
                 await fetch('/admin/otomatik-temizlik', { method: 'POST' });
-                
                 const response = await fetch('/admin/siparisler');
                 const siparisler = await response.json();
-                
                 document.getElementById('siparis-count').textContent = siparisler.length;
                 displaySiparisler(siparisler);
             } catch (error) {
@@ -329,7 +301,6 @@
 
         function displaySiparisler(siparisler) {
             const container = document.getElementById('siparisler-container');
-            
             if (!siparisler || siparisler.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -339,8 +310,8 @@
                 `;
                 return;
             }
-
             let html = `
+                <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -355,7 +326,6 @@
                     </thead>
                     <tbody>
             `;
-
             siparisler.forEach(siparis => {
                 html += `
                     <tr>
@@ -380,18 +350,15 @@
                         <td><small>${formatDate(siparis.created_at)}</small></td>
                         <td>
                             ${siparis.odeme_durumu === 'beklemede' 
-                                ? `<button onclick="updateSiparisStatus(${siparis.id}, 'odendi')" 
-                                           class="btn btn-success btn-small">✅ Ödendi</button>` 
+                                ? `<button onclick="updateSiparisStatus(${siparis.id}, 'odendi')" class="btn btn-success btn-small">✅ Ödendi</button>` 
                                 : `<span class="status-badge status-odendi">✅ Ödendi</span>`
                             }
-                            <button onclick="deleteSiparis(${siparis.id})" 
-                                    class="btn btn-danger btn-small">🗑️ Sil</button>
+                            <button onclick="deleteSiparis(${siparis.id})" class="btn btn-danger btn-small">🗑️ Sil</button>
                         </td>
                     </tr>
                 `;
             });
-
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             container.innerHTML = html;
         }
 
@@ -402,9 +369,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ durum: yeniDurum })
                 });
-
                 const result = await response.json();
-                
                 if (result.success) {
                     alert('✅ Sipariş durumu güncellendi!');
                     loadSiparisler();
@@ -419,14 +384,9 @@
 
         async function deleteSiparis(siparisId) {
             if (!confirm('Bu siparişi silmek istediğinize emin misiniz?')) return;
-            
             try {
-                const response = await fetch(`/admin/siparis/${siparisId}/sil`, {
-                    method: 'DELETE'
-                });
-
+                const response = await fetch(`/admin/siparis/${siparisId}/sil`, { method: 'DELETE' });
                 const result = await response.json();
-                
                 if (result.success) {
                     alert('✅ Sipariş silindi!');
                     loadSiparisler();
@@ -442,7 +402,6 @@
             try {
                 const response = await fetch('/admin/cancel-requests');
                 const talepler = await response.json();
-                
                 document.getElementById('iptal-count').textContent = talepler.length;
                 displayIptalTalepleri(talepler);
             } catch (error) {
@@ -452,7 +411,6 @@
 
         function displayIptalTalepleri(talepler) {
             const container = document.getElementById('iptaller-container');
-            
             if (!talepler || talepler.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -462,8 +420,8 @@
                 `;
                 return;
             }
-
             let html = `
+                <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -479,7 +437,6 @@
                     </thead>
                     <tbody>
             `;
-
             talepler.forEach(talep => {
                 html += `
                     <tr>
@@ -508,8 +465,7 @@
                     </tr>
                 `;
             });
-
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             container.innerHTML = html;
         }
 
@@ -520,9 +476,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status })
                 });
-
                 const result = await response.json();
-                
                 if (result.success) {
                     alert('✅ Durum güncellendi!');
                     loadIptalTalepleri();
@@ -535,16 +489,13 @@
 
         async function saveNotes(requestId) {
             const notes = document.getElementById(`notes-${requestId}`).value;
-            
             try {
                 const response = await fetch(`/admin/cancel-request/${requestId}/notes`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ notes })
                 });
-
                 const result = await response.json();
-                
                 if (result.success) {
                     alert('✅ Not kaydedildi!');
                 }
@@ -556,14 +507,9 @@
 
         async function deleteIptalTalebi(requestId) {
             if (!confirm('Bu iptal talebini silmek istediğinize emin misiniz?')) return;
-            
             try {
-                const response = await fetch(`/admin/cancel-request/${requestId}`, {
-                    method: 'DELETE'
-                });
-
+                const response = await fetch(`/admin/cancel-request/${requestId}`, { method: 'DELETE' });
                 const result = await response.json();
-                
                 if (result.success) {
                     alert('✅ İptal talebi silindi!');
                     loadIptalTalepleri();
@@ -583,13 +529,10 @@
                 default: return status;
             }
         }
-
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleString('tr-TR');
         }
-
-        // Auto refresh her 30 saniyede
         setInterval(loadAllData, 30000);
     </script>
 </body>
