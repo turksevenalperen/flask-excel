@@ -4,75 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Siparişler & İptal Talepleri</title>
-    <link href="https://fonts.googleapis.com/css?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8f9fa;
             min-height: 100vh;
+            padding: 10px;
         }
+        
         .container {
-            max-width: 100%;
-            padding: 8px;
+            max-width: 1400px;
             margin: 0 auto;
         }
-        @media (min-width: 600px) {
-            .container { max-width: 1400px; padding: 20px; }
-        }
-
+        
         .card {
             background: white;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 10px;
-            margin-bottom: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
             border: 1px solid #e9ecef;
         }
-        @media (min-width: 768px) {
-            .card { padding: 40px; }
-        }
-
+        
+        /* Navigation */
         .nav-card {
             background: #343a40;
             color: white;
-            margin-bottom: 20px;
+            padding: 15px;
         }
-        h1 {
-            color: #212529;
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            text-align: center;
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-title {
+            color: white;
+            font-size: 1.5em;
             font-weight: 600;
         }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
+        
+        h1 {
+            color: #212529;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
         .btn {
             background: #495057;
             color: white;
             border: none;
-            padding: 15px 40px;
+            padding: 10px 20px;
             border-radius: 8px;
-            font-size: 1.05em;
+            font-size: 0.95em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-block;
             text-decoration: none;
-            margin: 10px;
+            white-space: nowrap;
         }
+        
         .btn:hover {
             background: #343a40;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(52, 58, 64, 0.3);
         }
+        
         .btn-secondary { background: #6c757d; }
         .btn-secondary:hover { background: #5a6268; }
         .btn-success { background: #28a745; }
@@ -81,133 +94,280 @@
         .btn-warning:hover { background: #e0a800; }
         .btn-danger { background: #dc3545; }
         .btn-danger:hover { background: #c82333; }
-        .btn-small { padding: 8px 16px; font-size: 0.96em; margin: 2px; }
-
+        .btn-info { background: #17a2b8; }
+        .btn-info:hover { background: #138496; }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            margin: 2px;
+        }
+        
+        /* Tabs */
         .tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
+            gap: 5px;
+            margin-bottom: 25px;
             border-bottom: 2px solid #e9ecef;
-            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
+        
         .tab {
-            padding: 13px 20px;
+            padding: 12px 20px;
             background: transparent;
             border: none;
-            font-size: 1.09em;
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
             color: #6c757d;
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
+        
         .tab:hover { color: #495057; }
+        
         .tab.active {
             color: #007bff;
             border-bottom-color: #007bff;
         }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        .table-responsive { overflow-x: auto; }
-        table {
+        
+        /* Desktop Table */
+        .desktop-table {
+            display: none;
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background: white;
-            min-width: 600px;
         }
-        th, td {
-            padding: 13px 10px;
+        
+        .desktop-table th,
+        .desktop-table td {
+            padding: 12px 10px;
             text-align: left;
             border-bottom: 1px solid #e9ecef;
-            vertical-align: middle;
         }
-        th {
+        
+        .desktop-table th {
             background: #f8f9fa;
             color: #495057;
             font-weight: 600;
+            font-size: 0.9em;
             border-bottom: 2px solid #dee2e6;
         }
-        tr:hover {
+        
+        .desktop-table tr:hover {
             background: #f8f9fa;
         }
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.88em;
+        
+        /* Mobile Cards */
+        .mobile-cards {
+            display: block;
+        }
+        
+        .item-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        
+        .item-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.1);
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        
+        .item-id {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #007bff;
+        }
+        
+        .item-info {
+            margin-bottom: 12px;
+        }
+        
+        .info-label {
+            font-size: 0.85em;
+            color: #6c757d;
             font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .info-value {
+            color: #212529;
+            font-size: 0.95em;
+        }
+        
+        .info-highlight {
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        .item-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .item-actions .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
             text-transform: uppercase;
         }
+        
         .status-beklemede {
             background: #fff3cd;
             color: #856404;
-            border: 1px solid #ffeaa7;
         }
-        .status-odendi, .status-tamamlandi {
+        
+        .status-odendi,
+        .status-tamamlandi {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
         }
+        
         .status-iptal {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
         }
+        
         .empty-state {
             text-align: center;
-            padding: 60px 10px;
+            padding: 60px 20px;
             color: #6c757d;
         }
+        
         .empty-state h3 {
-            font-size: 2em;
-            margin-bottom: 15px;
-            opacity: 0.7;
+            font-size: 3em;
+            margin-bottom: 10px;
         }
-        .empty-state p { font-size: 1.05em; margin-bottom: 22px; }
+        
         textarea {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
             font-family: inherit;
             resize: vertical;
+            font-size: 0.9em;
         }
+        
         textarea:focus {
             outline: none;
             border-color: #667eea;
         }
-        /* RESPONSIVE BOOST */
-        @media (max-width: 900px) {
-            table { min-width: 480px; font-size: 0.97em; }
-            th, td { padding: 8px; }
+        
+        select.status-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95em;
+            background: white;
+            cursor: pointer;
         }
-        @media (max-width: 600px) {
-            .container { padding: 2px; }
-            .card { padding: 7px; }
-            .btn, .btn-secondary, .btn-success, .btn-warning, .btn-danger {
-                display: block;
-                width: 100%;
-                margin: 6px 0 !important;
-                font-size: 1em;
+        
+        .notes-section {
+            margin-top: 10px;
+        }
+        
+        .stat-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-item {
+            flex: 1;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        /* Tablet ve Desktop için */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
             }
-            .nav-card > div {
-                flex-direction: column !important;
-                gap: 0 !important;
+            
+            .card {
+                padding: 30px;
             }
-            .tabs {
-                flex-direction: column;
-                gap: 0;
+            
+            .nav-card {
+                padding: 20px;
             }
-            .tab {
-                width: 100%;
-                font-size: 1em;
-                padding: 10px 18px;
-                border-radius: 0;
-                text-align: left;
+            
+            h1 {
+                font-size: 2.2em;
             }
-            .table-responsive { margin: 0 -8px; }
-            table { font-size: 0.94em; }
+            
+            .mobile-cards {
+                display: none;
+            }
+            
+            .desktop-table {
+                display: table;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .desktop-table th,
+            .desktop-table td {
+                padding: 15px;
+            }
+        }
+        
+        /* Çok küçük ekranlar için */
+        @media (max-width: 400px) {
+            .nav-title {
+                font-size: 1.2em;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .item-id {
+                font-size: 1.1em;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
@@ -215,14 +375,13 @@
     <div class="container">
         <!-- Navigation -->
         <div class="card nav-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 10px 0;">
-                <h2 style="margin: 0; color: white; font-size: 1.5em;">🏢 Admin Panel</h2>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
-                    <a href="/view" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;">📋 Verileri Gör</a>
-                    <a href="/api/vehicles" class="btn btn-secondary" style="margin: 0; padding: 8px 20px;" target="_blank">📡 JSON API</a>
-                    <a href="/bank-management" class="btn" style="background: #17a2b8; margin: 0; padding: 8px 20px;">🏦 Banka Yönetimi</a>
-                    <button onclick="refreshAllData()" class="btn btn-success" style="margin: 0; padding: 8px 20px;">🔄 Yenile</button>
+            <div class="nav-content">
+                <h2 class="nav-title">🏢 Admin Panel</h2>
+                <div class="nav-buttons">
+                    <a href="/" class="btn">📊 Ana Sayfa</a>
+                    <a href="/view" class="btn btn-secondary">📋 Veriler</a>
+                    <a href="/bank-management" class="btn btn-info">🏦 Bankalar</a>
+                    <button onclick="refreshAllData()" class="btn btn-success">🔄 Yenile</button>
                 </div>
             </div>
         </div>
@@ -231,16 +390,16 @@
         <div class="card">
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('siparisler', event)">
-                    🛒 Sigorta Siparişleri (<span id="siparis-count">0</span>)
+                    🛒 Siparişler (<span id="siparis-count">0</span>)
                 </button>
                 <button class="tab" onclick="switchTab('iptaller', event)">
-                    ❌ Poliçe İptal Talepleri (<span id="iptal-count">0</span>)
+                    ❌ İptal Talepleri (<span id="iptal-count">0</span>)
                 </button>
             </div>
 
             <!-- SİPARİŞLER TAB -->
             <div id="tab-siparisler" class="tab-content active">
-                <h1 style="margin-bottom: 28px;">👥 Müşteri Siparişleri</h1>
+                <h1>🛒 Sigorta Siparişleri</h1>
                 <div id="siparisler-container">
                     <!-- Siparişler buraya yüklenecek -->
                 </div>
@@ -248,7 +407,7 @@
 
             <!-- İPTAL TALEPLERİ TAB -->
             <div id="tab-iptaller" class="tab-content">
-                <h1 style="margin-bottom: 28px;">❌ Poliçe İptal Talepleri</h1>
+                <h1>❌ Poliçe İptal Talepleri</h1>
                 <div id="iptaller-container">
                     <!-- İptal talepleri buraya yüklenecek -->
                 </div>
@@ -301,6 +460,7 @@
 
         function displaySiparisler(siparisler) {
             const container = document.getElementById('siparisler-container');
+            
             if (!siparisler || siparisler.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -310,9 +470,58 @@
                 `;
                 return;
             }
-            let html = `
-                <div class="table-responsive">
-                <table>
+
+            // Mobile Cards
+            let mobileHtml = '<div class="mobile-cards">';
+            siparisler.forEach(siparis => {
+                mobileHtml += `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-id">#${siparis.id}</div>
+                            <span class="status-badge status-${siparis.odeme_durumu}">
+                                ${siparis.odeme_durumu === 'beklemede' ? '⏳ Beklemede' : '✅ Ödendi'}
+                            </span>
+                        </div>
+                        
+                        <div class="item-info">
+                            <span class="info-label">Müşteri</span>
+                            <div class="info-value info-highlight">${siparis.ad_soyad}</div>
+                            <div class="info-value">📞 ${siparis.telefon}</div>
+                        </div>
+                        
+                        <div class="stat-row">
+                            <div class="stat-item">
+                                <span class="info-label">Araç</span>
+                                <div class="info-value"><strong>${siparis.marka} ${siparis.model}</strong></div>
+                                <div class="info-value">🚗 ${siparis.plaka}</div>
+                            </div>
+                            <div class="stat-item">
+                                <span class="info-label">Sigorta</span>
+                                <div class="info-value"><strong>${siparis.secilen_sigorta}</strong></div>
+                                <div class="info-value">💰 ${Number(siparis.fiyat).toLocaleString('tr-TR')} ₺</div>
+                            </div>
+                        </div>
+                        
+                        <div class="item-info">
+                            <span class="info-label">Tarih</span>
+                            <div class="info-value">${formatDate(siparis.created_at)}</div>
+                        </div>
+                        
+                        <div class="item-actions">
+                            ${siparis.odeme_durumu === 'beklemede' 
+                                ? `<button onclick="updateSiparisStatus(${siparis.id}, 'odendi')" class="btn btn-success">✅ Ödendi İşaretle</button>` 
+                                : `<button class="btn btn-success" disabled style="opacity: 0.6;">✅ Ödendi</button>`
+                            }
+                            <button onclick="deleteSiparis(${siparis.id})" class="btn btn-danger">🗑️ Sil</button>
+                        </div>
+                    </div>
+                `;
+            });
+            mobileHtml += '</div>';
+
+            // Desktop Table
+            let desktopHtml = `
+                <table class="desktop-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -326,8 +535,9 @@
                     </thead>
                     <tbody>
             `;
+
             siparisler.forEach(siparis => {
-                html += `
+                desktopHtml += `
                     <tr>
                         <td><strong>#${siparis.id}</strong></td>
                         <td>
@@ -348,18 +558,19 @@
                             </span>
                         </td>
                         <td><small>${formatDate(siparis.created_at)}</small></td>
-                        <td>
+                        <td style="white-space: nowrap;">
                             ${siparis.odeme_durumu === 'beklemede' 
-                                ? `<button onclick="updateSiparisStatus(${siparis.id}, 'odendi')" class="btn btn-success btn-small">✅ Ödendi</button>` 
-                                : `<span class="status-badge status-odendi">✅ Ödendi</span>`
+                                ? `<button onclick="updateSiparisStatus(${siparis.id}, 'odendi')" class="btn btn-success btn-small">✅</button>` 
+                                : `<span class="status-badge status-odendi" style="font-size: 0.75em;">✅</span>`
                             }
-                            <button onclick="deleteSiparis(${siparis.id})" class="btn btn-danger btn-small">🗑️ Sil</button>
+                            <button onclick="deleteSiparis(${siparis.id})" class="btn btn-danger btn-small">🗑️</button>
                         </td>
                     </tr>
                 `;
             });
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
+
+            desktopHtml += '</tbody></table>';
+            container.innerHTML = mobileHtml + desktopHtml;
         }
 
         async function updateSiparisStatus(siparisId, yeniDurum) {
@@ -411,6 +622,7 @@
 
         function displayIptalTalepleri(talepler) {
             const container = document.getElementById('iptaller-container');
+            
             if (!talepler || talepler.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -420,9 +632,57 @@
                 `;
                 return;
             }
-            let html = `
-                <div class="table-responsive">
-                <table>
+
+            // Mobile Cards
+            let mobileHtml = '<div class="mobile-cards">';
+            talepler.forEach(talep => {
+                mobileHtml += `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-id">#${talep.id}</div>
+                            <span class="status-badge status-${talep.status}">
+                                ${getStatusText(talep.status)}
+                            </span>
+                        </div>
+                        
+                        <div class="item-info">
+                            <span class="info-label">Müşteri</span>
+                            <div class="info-value info-highlight">${talep.name}</div>
+                            <div class="info-value">📞 ${talep.phone}</div>
+                        </div>
+                        
+                        <div class="item-info">
+                            <span class="info-label">Plaka</span>
+                            <div class="info-value">🚗 ${talep.plate}</div>
+                        </div>
+                        
+                        <div class="item-info">
+                            <span class="info-label">Tarih</span>
+                            <div class="info-value">${formatDate(talep.created_at)}</div>
+                        </div>
+                        
+                        <div class="notes-section">
+                            <span class="info-label">Notlar</span>
+                            <textarea id="notes-${talep.id}" rows="3" placeholder="Not ekle...">${talep.notes || ''}</textarea>
+                            <button onclick="saveNotes(${talep.id})" class="btn btn-secondary btn-small" style="margin-top: 8px; width: 100%;">💾 Notu Kaydet</button>
+                        </div>
+                        
+                        <div class="item-actions">
+                            <select onchange="updateIptalStatus(${talep.id}, this.value)" class="status-select">
+                                <option value="beklemede" ${talep.status === 'beklemede' ? 'selected' : ''}>⏳ Beklemede</option>
+                                <option value="tamamlandi" ${talep.status === 'tamamlandi' ? 'selected' : ''}>✅ Tamamlandı</option>
+                                <option value="iptal" ${talep.status === 'iptal' ? 'selected' : ''}>❌ İptal</option>
+                            </select>
+                            <button onclick="deleteIptalTalebi(${talep.id})" class="btn btn-danger" style="margin-top: 8px; width: 100%;">🗑️ Talebi Sil</button>
+                        </div>
+                    </div>
+                `;
+            });
+            mobileHtml += '</div>';
+
+            // Desktop Table
+            let desktopHtml = `
+                <table class="desktop-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -437,8 +697,9 @@
                     </thead>
                     <tbody>
             `;
+
             talepler.forEach(talep => {
-                html += `
+                desktopHtml += `
                     <tr>
                         <td><strong>#${talep.id}</strong></td>
                         <td><strong>${talep.name}</strong></td>
@@ -449,24 +710,25 @@
                                 ${getStatusText(talep.status)}
                             </span>
                         </td>
-                        <td>
-                            <textarea id="notes-${talep.id}" rows="2" placeholder="Not ekle...">${talep.notes || ''}</textarea>
-                            <button onclick="saveNotes(${talep.id})" class="btn btn-secondary btn-small" style="margin-top: 5px;">💾 Kaydet</button>
+                        <td style="min-width: 200px;">
+                            <textarea id="notes-desk-${talep.id}" rows="2" placeholder="Not ekle..." style="font-size: 0.85em;">${talep.notes || ''}</textarea>
+                            <button onclick="saveNotes(${talep.id}, true)" class="btn btn-secondary btn-small" style="margin-top: 5px;">💾</button>
                         </td>
                         <td><small>${formatDate(talep.created_at)}</small></td>
-                        <td>
-                            <select onchange="updateIptalStatus(${talep.id}, this.value)" class="btn btn-small" style="padding: 8px;">
+                        <td style="white-space: nowrap;">
+                            <select onchange="updateIptalStatus(${talep.id}, this.value)" class="btn btn-small" style="padding: 6px; font-size: 0.8em;">
                                 <option value="beklemede" ${talep.status === 'beklemede' ? 'selected' : ''}>Beklemede</option>
                                 <option value="tamamlandi" ${talep.status === 'tamamlandi' ? 'selected' : ''}>Tamamlandı</option>
                                 <option value="iptal" ${talep.status === 'iptal' ? 'selected' : ''}>İptal</option>
                             </select>
-                            <button onclick="deleteIptalTalebi(${talep.id})" class="btn btn-danger btn-small">🗑️ Sil</button>
+                            <button onclick="deleteIptalTalebi(${talep.id})" class="btn btn-danger btn-small">🗑️</button>
                         </td>
                     </tr>
                 `;
             });
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
+
+            desktopHtml += '</tbody></table>';
+            container.innerHTML = mobileHtml + desktopHtml;
         }
 
         async function updateIptalStatus(requestId, status) {
@@ -487,8 +749,9 @@
             }
         }
 
-        async function saveNotes(requestId) {
-            const notes = document.getElementById(`notes-${requestId}`).value;
+        async function saveNotes(requestId, isDesktop = false) {
+            const textareaId = isDesktop ? `notes-desk-${requestId}` : `notes-${requestId}`;
+            const notes = document.getElementById(textareaId).value;
             try {
                 const response = await fetch(`/admin/cancel-request/${requestId}/notes`, {
                     method: 'POST',
@@ -522,17 +785,25 @@
 
         function getStatusText(status) {
             switch (status) {
-                case 'beklemede': return 'Beklemede';
-                case 'tamamlandi': return 'Tamamlandı';
-                case 'iptal': return 'İptal';
-                case 'odendi': return 'Ödendi';
+                case 'beklemede': return '⏳ Beklemede';
+                case 'tamamlandi': return '✅ Tamamlandı';
+                case 'iptal': return '❌ İptal';
+                case 'odendi': return '✅ Ödendi';
                 default: return status;
             }
         }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleString('tr-TR');
+            return date.toLocaleString('tr-TR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
+
         setInterval(loadAllData, 30000);
     </script>
 </body>

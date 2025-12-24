@@ -15,7 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8f9fa;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
         
         .container {
@@ -27,31 +27,67 @@
             background: white;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 40px;
-            margin-bottom: 30px;
+            padding: 20px;
+            margin-bottom: 20px;
             border: 1px solid #e9ecef;
+        }
+        
+        /* Navigation */
+        .nav-card {
+            background: #343a40;
+            color: white;
+            padding: 15px;
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-title {
+            color: white;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
         h1 {
             color: #212529;
-            font-size: 2.5em;
+            font-size: 1.8em;
             margin-bottom: 10px;
-            text-align: center;
             font-weight: 600;
+        }
+        
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .btn {
             background: #495057;
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 10px 20px;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 0.95em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-block;
             text-decoration: none;
+            white-space: nowrap;
         }
         
         .btn:hover {
@@ -69,8 +105,8 @@
         
         .btn-danger {
             background: #dc3545;
-            padding: 8px 16px;
-            font-size: 0.9em;
+            padding: 8px 14px;
+            font-size: 0.85em;
         }
         
         .btn-danger:hover {
@@ -80,8 +116,8 @@
         .btn-warning {
             background: #ffc107;
             color: #212529;
-            padding: 8px 16px;
-            font-size: 0.9em;
+            padding: 8px 14px;
+            font-size: 0.85em;
         }
         
         .btn-warning:hover {
@@ -93,33 +129,107 @@
             font-size: 0.85em;
         }
         
-        table {
+        /* Desktop Table */
+        .desktop-table {
+            display: none;
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
         
-        th, td {
-            padding: 15px;
+        .desktop-table th,
+        .desktop-table td {
+            padding: 15px 10px;
             text-align: left;
             border-bottom: 1px solid #e9ecef;
         }
         
-        th {
+        .desktop-table th {
             background: #f8f9fa;
             color: #495057;
             font-weight: 600;
+            font-size: 0.9em;
         }
         
-        tr:hover {
+        .desktop-table tr:hover {
             background: #f8f9fa;
         }
         
+        /* Mobile Cards */
+        .mobile-cards {
+            display: block;
+        }
+        
+        .account-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        
+        .account-card:hover {
+            border-color: #495057;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        
+        .account-bank {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #212529;
+            flex: 1;
+        }
+        
+        .account-info {
+            margin-bottom: 12px;
+        }
+        
+        .info-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .info-value {
+            color: #212529;
+            font-size: 0.95em;
+        }
+        
+        .iban-value {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            word-break: break-all;
+        }
+        
+        .account-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+        
         .status-badge {
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85em;
             font-weight: 600;
+            display: inline-block;
         }
         
         .status-active {
@@ -141,6 +251,8 @@
             height: 100%;
             background: rgba(0,0,0,0.5);
             z-index: 1000;
+            padding: 10px;
+            overflow-y: auto;
         }
         
         .modal.active {
@@ -151,12 +263,18 @@
         
         .modal-content {
             background: white;
-            padding: 40px;
+            padding: 25px;
             border-radius: 15px;
             max-width: 600px;
-            width: 90%;
+            width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            margin: auto;
+        }
+        
+        .modal-content h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
         }
         
         .form-group {
@@ -168,6 +286,7 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: #495057;
+            font-size: 0.95em;
         }
         
         .form-group input,
@@ -185,32 +304,115 @@
             border-color: #667eea;
         }
         
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .form-buttons .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
             color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        /* Tablet ve Desktop için */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .card {
+                padding: 30px;
+            }
+            
+            .nav-card {
+                padding: 20px;
+            }
+            
+            .nav-title {
+                font-size: 1.5em;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            .mobile-cards {
+                display: none;
+            }
+            
+            .desktop-table {
+                display: table;
+            }
+            
+            .modal-content {
+                padding: 40px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .desktop-table th,
+            .desktop-table td {
+                padding: 15px;
+            }
+        }
+        
+        /* Çok küçük ekranlar için */
+        @media (max-width: 400px) {
+            .nav-title {
+                font-size: 1.1em;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+            
+            .account-bank {
+                font-size: 1.1em;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Navigation -->
-        <div class="card" style="background: #343a40; color: white; margin-bottom: 20px; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="margin: 0; color: white; font-size: 1.5em;">🏦 Banka Hesapları Yönetimi</h2>
-                <div style="display: flex; gap: 15px;">
-                    <a href="/" class="btn" style="background: #495057; margin: 0; padding: 8px 20px;">📊 Ana Sayfa</a>
-                    <a href="/admin-panel" class="btn" style="background: #28a745; margin: 0; padding: 8px 20px;">👥 Siparişler</a>
+        <div class="card nav-card">
+            <div class="nav-content">
+                <h2 class="nav-title">🏦 Banka Hesapları</h2>
+                <div class="nav-buttons">
+                    <a href="/" class="btn">📊 Ana Sayfa</a>
+                    <a href="/admin-panel" class="btn btn-success">👥 Siparişler</a>
                 </div>
             </div>
         </div>
 
         <!-- Bank Accounts List -->
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1 style="margin: 0; text-align: left;">Banka Hesapları</h1>
+            <div class="header-section">
+                <h1>Hesaplarım</h1>
                 <button onclick="openAddModal()" class="btn btn-success">
-                    ➕ Yeni Hesap Ekle
+                    ➕ Yeni Hesap
                 </button>
             </div>
             
@@ -223,8 +425,8 @@
     <!-- Add/Edit Modal -->
     <div id="accountModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle">Yeni Banka Hesabı Ekle</h2>
-            <form id="accountForm" style="margin-top: 30px;">
+            <h2 id="modalTitle">Yeni Banka Hesabı</h2>
+            <form id="accountForm">
                 <input type="hidden" id="accountId">
                 
                 <div class="form-group">
@@ -258,12 +460,12 @@
                     </label>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 30px;">
-                    <button type="submit" class="btn btn-success" style="flex: 1;">
-                        Kaydet
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-success">
+                        💾 Kaydet
                     </button>
-                    <button type="button" onclick="closeModal()" class="btn" style="flex: 1; background: #6c757d;">
-                        İptal
+                    <button type="button" onclick="closeModal()" class="btn">
+                        ❌ İptal
                     </button>
                 </div>
             </form>
@@ -271,14 +473,12 @@
     </div>
 
     <script>
-        // Sayfa yüklendiğinde hesapları getir
         document.addEventListener('DOMContentLoaded', loadAccounts);
 
         async function loadAccounts() {
             try {
                 const response = await fetch('/admin/bank-accounts');
                 const accounts = await response.json();
-                
                 displayAccounts(accounts);
             } catch (error) {
                 console.error('Hesaplar yüklenirken hata:', error);
@@ -298,8 +498,52 @@
                 return;
             }
 
-            let html = `
-                <table>
+            // Mobile Cards
+            let mobileHtml = '<div class="mobile-cards">';
+            accounts.forEach(account => {
+                mobileHtml += `
+                    <div class="account-card">
+                        <div class="account-header">
+                            <div class="account-bank">${account.bank_name}</div>
+                            <span class="status-badge ${account.is_active ? 'status-active' : 'status-inactive'}">
+                                ${account.is_active ? '✓ Aktif' : '✕ Pasif'}
+                            </span>
+                        </div>
+                        
+                        <div class="account-info">
+                            <span class="info-label">IBAN</span>
+                            <div class="iban-value">${account.iban}</div>
+                        </div>
+                        
+                        <div class="account-info">
+                            <span class="info-label">Hesap Sahibi</span>
+                            <div class="info-value">${account.account_name}</div>
+                        </div>
+                        
+                        <div class="account-info">
+                            <span class="info-label">Şube</span>
+                            <div class="info-value">${account.branch}</div>
+                        </div>
+                        
+                        <div class="account-actions">
+                            <button onclick="editAccount(${account.id})" class="btn btn-warning btn-small">
+                                ✏️ Düzenle
+                            </button>
+                            <button onclick="toggleAccount(${account.id})" class="btn ${account.is_active ? 'btn-warning' : 'btn-success'} btn-small">
+                                ${account.is_active ? '⏸️ Pasif' : '▶️ Aktif'}
+                            </button>
+                            <button onclick="deleteAccount(${account.id})" class="btn btn-danger btn-small">
+                                🗑️ Sil
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            mobileHtml += '</div>';
+
+            // Desktop Table
+            let desktopHtml = `
+                <table class="desktop-table">
                     <thead>
                         <tr>
                             <th>Banka</th>
@@ -315,10 +559,10 @@
             `;
 
             accounts.forEach(account => {
-                html += `
+                desktopHtml += `
                     <tr>
                         <td><strong>${account.bank_name}</strong></td>
-                        <td><code>${account.iban}</code></td>
+                        <td><code style="font-size: 0.85em;">${account.iban}</code></td>
                         <td>${account.account_name}</td>
                         <td>${account.branch}</td>
                         <td>
@@ -327,27 +571,23 @@
                             </span>
                         </td>
                         <td>${account.order}</td>
-                        <td>
-                            <button onclick="editAccount(${account.id})" class="btn btn-warning btn-small">
-                                ✏️ Düzenle
-                            </button>
+                        <td style="white-space: nowrap;">
+                            <button onclick="editAccount(${account.id})" class="btn btn-warning btn-small">✏️</button>
                             <button onclick="toggleAccount(${account.id})" class="btn ${account.is_active ? 'btn-warning' : 'btn-success'} btn-small">
-                                ${account.is_active ? '⏸️ Pasif Yap' : '▶️ Aktif Yap'}
+                                ${account.is_active ? '⏸️' : '▶️'}
                             </button>
-                            <button onclick="deleteAccount(${account.id})" class="btn btn-danger btn-small">
-                                🗑️ Sil
-                            </button>
+                            <button onclick="deleteAccount(${account.id})" class="btn btn-danger btn-small">🗑️</button>
                         </td>
                     </tr>
                 `;
             });
 
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            desktopHtml += '</tbody></table>';
+            container.innerHTML = mobileHtml + desktopHtml;
         }
 
         function openAddModal() {
-            document.getElementById('modalTitle').textContent = 'Yeni Banka Hesabı Ekle';
+            document.getElementById('modalTitle').textContent = 'Yeni Banka Hesabı';
             document.getElementById('accountForm').reset();
             document.getElementById('accountId').value = '';
             document.getElementById('isActive').checked = true;
@@ -361,7 +601,7 @@
                 const account = accounts.find(a => a.id === id);
                 
                 if (account) {
-                    document.getElementById('modalTitle').textContent = 'Banka Hesabını Düzenle';
+                    document.getElementById('modalTitle').textContent = 'Hesabı Düzenle';
                     document.getElementById('accountId').value = account.id;
                     document.getElementById('bankName').value = account.bank_name;
                     document.getElementById('iban').value = account.iban;
@@ -434,14 +674,12 @@
             try {
                 let response;
                 if (accountId) {
-                    // Güncelleme
                     response = await fetch(`/admin/bank-account/${accountId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     });
                 } else {
-                    // Yeni ekleme
                     response = await fetch('/admin/bank-account/add', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -464,7 +702,6 @@
             }
         });
 
-        // Modal dışına tıklandığında kapat
         document.getElementById('accountModal').addEventListener('click', (e) => {
             if (e.target.id === 'accountModal') {
                 closeModal();
